@@ -91,7 +91,7 @@ def run(manifest, model, limit=0, save_audio=False, asr_bleu=False):
         os.makedirs(out_dir, exist_ok=True)
     adapter = ADAPTERS[model](audio_out_dir=out_dir) if save_audio else ADAPTERS[model]()
     check._save_audio = save_audio
-    reasr = ADAPTERS["normal"]() if asr_bleu else None   # 译后语音回环再识别走产品 normal，不污染被测端点
+    reasr = ADAPTERS["std"]() if asr_bleu else None   # 译后语音回环再识别走 std，不污染被测端点
 
     n_ok = 0
     print(f"== 流式自检 {model} · {os.path.basename(manifest)} · {len(rows)} 条 "

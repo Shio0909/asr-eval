@@ -51,7 +51,7 @@ def _ok(i, hyp="今天天气好", elapsed=0.5, workers=None, audio=2.0):
 
 
 def _meta(mani, workers=1, sha=None):
-    return {"id": "__meta__", "model": "ext-pro", "endpoint": "http://x/asr_lite",
+    return {"id": "__meta__", "model": "ext-adv", "endpoint": "http://x/asr_lite",
             "language": "zh", "workers": workers, "manifest": mani,
             "manifest_sha": sha or manifest_sha(mani),
             "started": "2026-06-10T10:00:00+08:00", "n_total": 4, "n_todo": 4}
@@ -122,7 +122,7 @@ def test_mixed_workers_latency_serial_only(tmp_path):
     assert s["concurrent_latency_p95_s"] == 0.1
     assert s["concurrent_workers"] == [4]
     assert abs(s["rtf_mean"] - 0.3) < 1e-9  # (0.25+0.35)/2，并发两条不进 RTF
-    assert s["meta"]["model"] == "ext-pro" and s["meta"]["endpoint"] == "http://x/asr_lite"
+    assert s["meta"]["model"] == "ext-adv" and s["meta"]["endpoint"] == "http://x/asr_lite"
 
 
 def test_simult_stability_metrics_are_aggregated_and_stable_ttfb_is_serial_only(tmp_path):
@@ -325,7 +325,7 @@ def test_manifest_sha_v2_is_recorded_without_changing_v1_behavior(tmp_path):
     meta = _meta(mani)
     meta["manifest_sha_v2"] = manifest_sha_v2(mani)
     meta["run_id"] = "run-1"
-    meta["run_spec"] = {"model": "ext-pro"}
+    meta["run_spec"] = {"model": "ext-adv"}
     meta["code_revision"] = "infer-rev"
     inf = _write_jsonl(tmp_path / "i.jsonl", [meta] + [_ok(i, workers=1) for i in range(4)])
     s = score.run(mani, inf, out=str(tmp_path / "r.json"))

@@ -31,8 +31,8 @@ def _reset_jobs(monkeypatch):
 
 def test_run_dedupe_distinguishes_limit_seed_and_comet(monkeypatch):
     _reset_jobs(monkeypatch)
-    first = server.RunReq(model="lite", dataset="aishell", tier="lite", limit=50, seed=1, comet=False)
-    second = server.RunReq(model="lite", dataset="aishell", tier="lite", limit=300, seed=42, comet=True)
+    first = server.RunReq(model="light", dataset="aishell", tier="lite", limit=50, seed=1, comet=False)
+    second = server.RunReq(model="light", dataset="aishell", tier="lite", limit=300, seed=42, comet=True)
 
     r1 = server.run(first)
     r2 = server.run(second)
@@ -44,7 +44,7 @@ def test_run_dedupe_distinguishes_limit_seed_and_comet(monkeypatch):
 
 def test_run_dedupes_identical_normalized_request(monkeypatch):
     _reset_jobs(monkeypatch)
-    req = server.RunReq(model="lite", dataset="aishell", tier="lite", limit=50, seed=1)
+    req = server.RunReq(model="light", dataset="aishell", tier="lite", limit=50, seed=1)
 
     r1 = server.run(req)
     r2 = server.run(req)
@@ -76,21 +76,21 @@ def test_accuracy_mode_defaults_to_four_workers_and_model_scoped_locks(monkeypat
     server._EP_LOCKS.clear()
 
     result = server.run(server.RunReq(
-        model="lite", dataset="aishell", tier="lite", limit=5,
+        model="light", dataset="aishell", tier="lite", limit=5,
     ))
     job = server.JOBS[result["job_id"]]
 
     assert job["run_mode"] == "accuracy"
     assert job["workers"] == 4
-    assert server._ep_lock("normal", "accuracy") is not server._ep_lock("pro", "accuracy")
-    assert server._ep_lock("normal", "latency") is server._ep_lock("pro", "latency")
+    assert server._ep_lock("std", "accuracy") is not server._ep_lock("adv", "accuracy")
+    assert server._ep_lock("std", "latency") is server._ep_lock("adv", "latency")
 
 
 def test_latency_mode_forces_single_worker(monkeypatch):
     _reset_jobs(monkeypatch)
 
     result = server.run(server.RunReq(
-        model="normal", dataset="aishell", tier="lite", limit=5,
+        model="std", dataset="aishell", tier="lite", limit=5,
         run_mode="latency", workers=8,
     ))
     job = server.JOBS[result["job_id"]]
@@ -154,9 +154,9 @@ def test_openapi_operation_schema_resolves_multipart_ref_and_filters_transport_f
     doc = {
         "openapi": "3.1.0",
         "paths": {
-            "/api/v2/asr/pro": {
+            "/api/asr/adv": {
                 "post": {
-                    "summary": "Pro ASR",
+                    "summary": "Advanced ASR",
                     "parameters": [
                         {"name": "trace_id", "in": "query", "schema": {"type": "string"}},
                         {"name": "Authorization", "in": "header", "schema": {"type": "string"}},
@@ -197,9 +197,9 @@ def test_openapi_operation_schema_resolves_multipart_ref_and_filters_transport_f
 
     assert len(operations) == 1
     op = operations[0]
-    assert op["path"] == "/api/v2/asr/pro"
+    assert op["path"] == "/api/asr/adv"
     assert op["template"] == "plat-multipart"
-    assert op["template_path"] == "pro"
+    assert op["template_path"] == "adv"
     assert op["audio_field"] == "file"
     names = {field["name"] for field in op["request_schema"]}
     assert names == {"language", "enable_text_edit", "speaker_merge_gap_ms", "trace_id"}
@@ -261,10 +261,10 @@ def test_runtime_request_params_are_allowlisted_typed_and_defaulted():
 def test_interface_config_fingerprint_changes_with_runtime_params_but_not_secret(monkeypatch):
     cfg = {
         "id": "x-pro",
-        "name": "Pro",
+        "name": "Advanced",
         "base_url": "http://asr.test",
         "template": "plat-multipart",
-        "path": "pro",
+        "path": "adv",
         "api_key": "secret-a",
         "key_env": "ASR_TOKEN",
         "request_schema": [
@@ -284,16 +284,16 @@ def test_interface_config_fingerprint_changes_with_runtime_params_but_not_secret
 
 
 def test_target_language_changes_runtime_fingerprint():
-    en = server._runtime_config("pro", {}, {"target_lang": "英文"})
-    zh = server._runtime_config("pro", {}, {"target_lang": "中文"})
+    en = server._runtime_config("adv", {}, {"target_lang": "英文"})
+    zh = server._runtime_config("adv", {}, {"target_lang": "中文"})
 
     assert en["hash"] and zh["hash"]
     assert en["hash"] != zh["hash"]
 
 
 def test_custom_hotwords_change_runtime_fingerprint():
-    first = server._runtime_config("deepthink", {}, {"hotwords_text": "ExampleTerm"})
-    second = server._runtime_config("deepthink", {}, {"hotwords_text": "示例词"})
+    first = server._runtime_config("sse", {}, {"hotwords_text": "ExampleTerm"})
+    second = server._runtime_config("sse", {}, {"hotwords_text": "示例词"})
 
     assert first["hash"] and second["hash"]
     assert first["hash"] != second["hash"]
@@ -307,11 +307,11 @@ def test_all_visible_builtin_interfaces_have_explicit_contract_status():
     assert all(m["capability_contract"].get("tasks") for m in payloads)
     assert all(m["capability_contract"].get("input_modalities") for m in payloads)
     assert all(m["capability_contract"].get("output_modalities") for m in payloads)
-    assert next(m for m in payloads if m["id"] == "pro")["request_contract"]["source"] == "platform-openapi"
-    assert {x["name"] for x in next(m for m in payloads if m["id"] == "pro")["request_schema"]} >= {
+    assert next(m for m in payloads if m["id"] == "adv")["request_contract"]["source"] == "platform-openapi"
+    assert {x["name"] for x in next(m for m in payloads if m["id"] == "adv")["request_schema"]} >= {
         "language", "target_lang", "enable_text_edit", "speaker_merge_gap_ms",
     }
-    pro_schema = next(m for m in payloads if m["id"] == "pro")["request_schema"]
+    pro_schema = next(m for m in payloads if m["id"] == "adv")["request_schema"]
     assert "英文逗号" in next(x for x in pro_schema if x["name"] == "language")["description"]
     assert "仅在说话人识别开启时生效" in next(
         x for x in pro_schema if x["name"] == "speaker_merge_gap_ms"
@@ -319,7 +319,7 @@ def test_all_visible_builtin_interfaces_have_explicit_contract_status():
 
 
 def test_own_service_contracts_match_verified_public_surfaces():
-    lite = server._model_payload(server._find_model("lite"))
+    lite = server._model_payload(server._find_model("light"))
     assert {x["name"] for x in lite["request_schema"]} == {
         "audio", "language", "itn", "hotwords",
     }
@@ -328,26 +328,26 @@ def test_own_service_contracts_match_verified_public_surfaces():
     assert lite["capability_contract"]["output_modalities"] == ["final_text"]
     assert lite["capability_contract"]["features"]["timestamps"] is False
 
-    normal = server._model_payload(server._find_model("normal"))
+    normal = server._model_payload(server._find_model("std"))
     assert {x["name"] for x in normal["request_schema"]} == {
         "file", "enable_word_timestamps", "language",
     }
 
-    pro = server._model_payload(server._find_model("pro"))
+    pro = server._model_payload(server._find_model("adv"))
     edit = next(x for x in pro["request_schema"] if x["name"] == "enable_text_edit")
     assert edit["api_default"] is True and edit["eval_default"] is False
     assert {"raw_result", "alt_result", "pipeline_status", "speaker_overlap"} <= set(
         pro["capability_contract"]["output_modalities"]
     )
 
-    domain = server._model_payload(server._find_model("pro-domain"))
+    domain = server._model_payload(server._find_model("adv-domain"))
     hotwords = next(x for x in domain["request_schema"] if x.get("managed_by") == "hotwords")
     assert hotwords["wire_name"] == "hot_words"
 
-    deepthink = server._model_payload(server._find_model("deepthink"))["capability_contract"]
-    assert deepthink["streaming"]["granularity"] == "stage_event"
-    assert deepthink["streaming"]["token_delta"] is False
-    assert deepthink["response_events"] == ["start", "asr_result", "sop", "done", "error"]
+    sse = server._model_payload(server._find_model("sse"))["capability_contract"]
+    assert sse["streaming"]["granularity"] == "stage_event"
+    assert sse["streaming"]["token_delta"] is False
+    assert sse["response_events"] == ["start", "asr_result", "sop", "done", "error"]
 
     formula = server._model_payload(server._find_model("plat-formula"))
     text = next(x for x in formula["request_schema"] if x["name"] == "text")
@@ -385,7 +385,7 @@ def test_own_streaming_profiles_declare_fixed_requests_and_full_outputs():
 
     diar = server._model_payload(server._find_model("plat-diar"))
     assert diar["request_contract"]["kind"] == "evaluation_profile"
-    assert diar["request_contract"]["profile_of"] == "pro"
+    assert diar["request_contract"]["profile_of"] == "adv"
     assert diar["request_contract"]["fixed_request"] == {
         "enable_speaker_diarization": True,
     }
@@ -408,17 +408,17 @@ def test_custom_interface_infers_hotword_cap_from_registered_schema():
 
 
 def test_endpoint_capabilities_do_not_leak_across_normal_pro_domain():
-    normal = server._model_caps(server._find_model("normal"))
-    pro = server._model_caps(server._find_model("pro"))
-    domain = server._model_caps(server._find_model("pro-domain"))
+    normal = server._model_caps(server._find_model("std"))
+    pro = server._model_caps(server._find_model("adv"))
+    domain = server._model_caps(server._find_model("adv-domain"))
 
     assert "hotwords" not in normal and "domain" not in normal
     assert "hotwords" not in pro and "domain" not in pro
     assert {"asr", "translate_audio", "hotwords", "domain"} <= set(domain)
 
 
-def test_deepthink_declares_translation_and_dual_result():
-    caps = server._model_caps(server._find_model("deepthink"))
+def test_sse_declares_translation_and_dual_result():
+    caps = server._model_caps(server._find_model("sse"))
 
     assert {"asr", "translate_audio", "hotwords", "dual_result"} <= set(caps)
     assert "hotwords" in server._model_caps(server._find_model("plat-simult"))
@@ -553,7 +553,7 @@ def test_legacy_normal_hotword_result_is_preserved_but_invalidated(tmp_path, mon
     results.mkdir()
     path = results / "normal_seaco_n50_hw.json"
     path.write_text(json.dumps({"summary": {
-        "model": "normal", "dataset": "seaco", "tier": "lite",
+        "model": "std", "dataset": "seaco", "tier": "lite",
         "meta": {"hotwords": True}, "low_coverage": False,
     }}), encoding="utf-8")
     monkeypatch.setattr(server, "ROOT", str(tmp_path))
@@ -562,7 +562,7 @@ def test_legacy_normal_hotword_result_is_preserved_but_invalidated(tmp_path, mon
 
     assert row["invalid_identity"] is True
     assert row["low_coverage"] is True
-    assert "pro-domain" in row["invalid_reason"]
+    assert "adv-domain" in row["invalid_reason"]
 
 
 def test_dashboard_run_dedupes_same_request_params_and_separates_changed_params(monkeypatch):
@@ -571,7 +571,7 @@ def test_dashboard_run_dedupes_same_request_params_and_separates_changed_params(
         "id": "x-runtime",
         "base_url": "http://asr.test",
         "template": "plat-multipart",
-        "path": "pro",
+        "path": "adv",
         "request_schema": [
             {"name": "enable_text_edit", "in": "form", "type": "boolean", "default": False},
         ],
@@ -602,9 +602,9 @@ def test_dashboard_run_dedupes_same_request_params_and_separates_changed_params(
 
 
 def test_result_model_parses_legacy_lite_filename():
-    assert server._result_model("/x/results/aishell_lite_lite_n300_s42.json", {}) == "lite"
+    assert server._result_model("/x/results/aishell_light_lite_n300_s42.json", {}) == "light"
     assert server._result_model("/x/results/fleurs_multi_qwen-simult_lite_n80_s42.json", {}) == "qwen-simult"
-    assert server._result_model("/x/results/seaco_ext-pro_full_hw.json", {}) == "ext-pro"
+    assert server._result_model("/x/results/seaco_ext-adv_full_hw.json", {}) == "ext-adv"
 
 
 def test_jobs_marks_external_dashboard_running_as_interrupted(monkeypatch):
@@ -645,7 +645,7 @@ def test_jobs_hydrates_legacy_cli_result_for_clickable_detail(monkeypatch):
     cli = {"id": "cli_done", "origin": "cli", "status": "done",
            "stage": "完成", "out": "aishell_lite_full.json"}
     summary = {"metric": "CER", "CER": 0.02, "n_ok": 10, "n_total": 10,
-               "meta": {"run_spec": {"model": "lite", "workers": 4,
+               "meta": {"run_spec": {"model": "light", "workers": 4,
                                         "language": "auto", "config_hash": "abc123",
                                         "request_params": {"itn": False},
                                         "endpoint": "http://example.test/asr"}}}
@@ -925,10 +925,10 @@ def test_edit_custom_plat_recovers_display_url_saved_as_base_url(tmp_path, monke
     broken = {
         "id": "x-normal-8000",
         "name": "旧名称",
-        "base_url": "http://h.example.test/api/v2/asr/normal",
-        "url": "h.example.test/api/v2/asr/normal",
+        "base_url": "http://h.example.test/api/asr/std",
+        "url": "h.example.test/api/asr/std",
         "template": "plat-multipart",
-        "path": "normal",
+        "path": "std",
         "scenarios": ["ASR"],
         "enabled": True,
     }
@@ -944,14 +944,14 @@ def test_edit_custom_plat_recovers_display_url_saved_as_base_url(tmp_path, monke
         broken["id"],
         server.EditIfaceReq(
             name="新名称",
-            base_url="http://h.example.test/api/v2/asr/normal",
+            base_url="http://h.example.test/api/asr/std",
         ),
     )
 
     saved = json.loads(target.read_text(encoding="utf-8"))[0]
     assert out == {"ok": True, "builtin": False, "schema_reset": False}
     assert saved["base_url"] == "http://h.example.test"
-    assert saved["url"] == "h.example.test/api/v2/asr/normal"
+    assert saved["url"] == "h.example.test/api/asr/std"
     assert server.MODELS[0]["base_url"] == "http://h.example.test"
 
 
@@ -961,9 +961,9 @@ def test_edit_custom_interface_clears_stale_request_schema_when_endpoint_changes
         "id": "x-schema",
         "name": "带参数接口",
         "base_url": "http://old.test",
-        "url": "old.test/api/v2/asr/pro",
+        "url": "old.test/api/asr/adv",
         "template": "plat-multipart",
-        "path": "pro",
+        "path": "adv",
         "scenarios": ["ASR"],
         "enabled": True,
         "request_schema": [
@@ -994,11 +994,11 @@ def test_edit_custom_interface_can_refresh_path_and_request_schema(tmp_path, mon
     target = tmp_path / "interfaces.json"
     cfg = {
         "id": "x-refresh",
-        "name": "Normal",
+        "name": "Standard",
         "base_url": "http://asr.test",
-        "url": "asr.test/api/v2/asr/normal",
+        "url": "asr.test/api/asr/std",
         "template": "plat-multipart",
-        "path": "normal",
+        "path": "std",
         "scenarios": ["ASR"],
         "enabled": True,
         "request_schema": [
@@ -1021,26 +1021,26 @@ def test_edit_custom_interface_can_refresh_path_and_request_schema(tmp_path, mon
     out = server.edit_iface(
         cfg["id"],
         server.EditIfaceReq(
-            name="Pro", base_url="http://asr.test", path="pro",
+            name="Advanced", base_url="http://asr.test", path="adv",
             request_schema=refreshed,
         ),
     )
 
     saved = json.loads(target.read_text(encoding="utf-8"))[0]
     assert out["schema_reset"] is False
-    assert saved["path"] == "pro"
-    assert saved["url"] == "asr.test/api/v2/asr/pro"
+    assert saved["path"] == "adv"
+    assert saved["url"] == "asr.test/api/asr/adv"
     assert [x["name"] for x in saved["request_schema"]] == [
         "enable_text_edit", "speaker_merge_gap_ms",
     ]
-    assert server.MODELS[0]["path"] == "pro"
+    assert server.MODELS[0]["path"] == "adv"
     assert len(server.MODELS[0]["request_schema"]) == 2
 
 
 def test_job_request_reads_sanitized_preview_from_job_log(tmp_path, monkeypatch):
     preview = {
         "method": "POST",
-        "url": "http://asr.internal/api/v2/asr/normal",
+        "url": "http://asr.internal/api/asr/std",
         "headers": {"Authorization": "<Bearer token hidden>"},
         "form": {"language": "auto"},
         "files": {"file": {"value": "<audio omitted>", "content_type": "audio/wav"}},
@@ -1086,7 +1086,7 @@ def test_every_visible_builtin_interface_has_a_test_strategy():
     for model in server._BUILTIN_MODELS.values():
         current = dict(model)
         if current["id"] == "plat-simult":
-            current["url"] = "ws://simult.internal/ws/v2/audio/simult-interpreting"
+            current["url"] = "ws://simult.internal/ws/audio/simult-interpreting"
         configs[current["id"]] = server._builtin_test_cfg(current["id"], current)
 
     assert set(configs) == set(server._BUILTIN_MODELS)
@@ -1095,9 +1095,9 @@ def test_every_visible_builtin_interface_has_a_test_strategy():
 
 
 def test_lite_mlt_builtin_test_uses_mlt_route():
-    model = next(m for m in server.MODELS if m["id"] == "lite-mlt")
+    model = next(m for m in server.MODELS if m["id"] == "light-mlt")
 
-    cfg = server._builtin_test_cfg("lite-mlt", model)
+    cfg = server._builtin_test_cfg("light-mlt", model)
 
     assert cfg["base_url"] == "http://lite.test:8001"
     assert cfg["template"] == "asr_lite"
@@ -1107,7 +1107,7 @@ def test_lite_mlt_builtin_test_uses_mlt_route():
 def test_builtin_special_test_config_normalizes_plat_base_and_keeps_key_override():
     model = {
         "id": "plat-simult-ws", "name": "同传",
-        "url": "wss://asr.internal/ws/v2/audio/voice-input",
+        "url": "wss://asr.internal/ws/audio/voice-input",
     }
     cfg = server._builtin_test_cfg(
         "plat-simult-ws", model,
@@ -1121,7 +1121,7 @@ def test_builtin_special_test_config_normalizes_plat_base_and_keeps_key_override
 
 def test_all_visible_plat_builtins_use_platform_and_token_env():
     ids = {
-        "normal", "pro", "deepthink", "plat-simult", "plat-simult-ws",
+        "std", "adv", "sse", "plat-simult", "plat-simult-ws",
         "plat-minutes", "plat-formula", "plat-diar",
     }
     models = {m["id"]: m for m in server.MODELS if m["id"] in ids}
@@ -1133,16 +1133,16 @@ def test_all_visible_plat_builtins_use_platform_and_token_env():
 
 
 def test_stale_builtin_override_migrates_to_default(monkeypatch):
-    monkeypatch.setattr(server, "_RETIRED_BUILTIN_URLS", frozenset({"old.example/api/v2/asr/normal"}))
+    monkeypatch.setattr(server, "_RETIRED_BUILTIN_URLS", frozenset({"old.example/api/asr/std"}))
     cfg = server._normalize_custom_iface({
         "kind": "builtin",
-        "id": "normal",
-        "url": "old.example/api/v2/asr/normal",
+        "id": "std",
+        "url": "old.example/api/asr/std",
         "endpoint": "retired",
         "key_env": "",
     })
 
-    assert cfg["url"] != "old.example/api/v2/asr/normal"
+    assert cfg["url"] != "old.example/api/asr/std"
     assert cfg["endpoint"] == "platform"
     assert cfg["key_env"] == "ASR_PLATFORM_TOKEN"
 
@@ -1370,8 +1370,8 @@ def test_asr_lite_interface_config_keeps_request_parameters():
 
 
 def test_model_payload_explains_language_values_without_binding_them():
-    lite = server._model_payload(next(m for m in server.MODELS if m["id"] == "lite"))
-    normal = server._model_payload(next(m for m in server.MODELS if m["id"] == "normal"))
+    lite = server._model_payload(next(m for m in server.MODELS if m["id"] == "light"))
+    normal = server._model_payload(next(m for m in server.MODELS if m["id"] == "std"))
 
     assert lite["language_spec"]["values"] == ["auto", "中文", "英文", "日文"]
     assert lite["language_spec"]["supported"] is True
@@ -1381,7 +1381,7 @@ def test_model_payload_explains_language_values_without_binding_them():
 
 def test_plat_sse_custom_interface_declares_candidate_language_passthrough():
     model = {
-        "id": "x-deepthink", "name": "新deepthink", "group": "custom",
+        "id": "x-sse", "name": "新sse", "group": "custom",
         "endpoint": "http://custom.test:9000", "url": "custom.test:9000",
         "tmpl": "plat-sse", "enabled": True,
     }
@@ -1409,10 +1409,10 @@ def test_run_keeps_language_override_per_model_request(monkeypatch):
     _reset_jobs(monkeypatch)
 
     r1 = server.run(server.RunReq(
-        model="lite", dataset="aishell", tier="lite", limit=5, language="auto",
+        model="light", dataset="aishell", tier="lite", limit=5, language="auto",
     ))
     r2 = server.run(server.RunReq(
-        model="normal", dataset="aishell", tier="lite", limit=5, language="sichuan",
+        model="std", dataset="aishell", tier="lite", limit=5, language="sichuan",
     ))
 
     assert server.JOBS[r1["job_id"]]["language"] == "auto"
@@ -1423,7 +1423,7 @@ def test_run_records_custom_and_dataset_hotwords_separately(monkeypatch):
     _reset_jobs(monkeypatch)
 
     result = server.run(server.RunReq(
-        model="lite", dataset="seaco", tier="lite", limit=5,
+        model="light", dataset="seaco", tier="lite", limit=5,
         hotwords=True, hotwords_text="ExampleTerm 示例词",
     ))
     job = server.JOBS[result["job_id"]]
@@ -1581,20 +1581,20 @@ def test_scope_decision_completes_large_error_without_reviewing_each_block(tmp_p
 def test_review_result_picker_groups_current_runs_and_hides_noise(monkeypatch):
     rows = [
         {"_file": "aishell_pro_old.json", "_mtime": 1, "task": "asr", "metric": "CER",
-         "model": "pro", "dataset": "aishell", "manifest": "manifests/a.jsonl",
+         "model": "adv", "dataset": "aishell", "manifest": "manifests/a.jsonl",
          "n_total": 300, "err_rate": .1, "meta": {"manifest_sha_v2": "a" * 12}},
         {"_file": "aishell_pro_new.json", "_mtime": 2, "task": "asr", "metric": "CER",
-         "model": "pro", "dataset": "aishell", "manifest": "manifests/a.jsonl",
+         "model": "adv", "dataset": "aishell", "manifest": "manifests/a.jsonl",
          "n_total": 300, "err_rate": .09, "meta": {"manifest_sha_v2": "a" * 12}},
         {"_file": "_smoke.json", "_mtime": 3, "task": "asr", "metric": "CER",
-         "model": "pro", "dataset": "aishell", "manifest": "manifests/a.jsonl",
+         "model": "adv", "dataset": "aishell", "manifest": "manifests/a.jsonl",
          "n_total": 1, "err_rate": 0, "meta": {"manifest_sha_v2": "a" * 12}},
         {"_file": "legacy.json", "_mtime": 3, "task": "asr", "metric": "CER",
          "model": "legacy-pro", "dataset": "aishell", "manifest": "manifests/a.jsonl",
          "n_total": 300, "err_rate": .1, "meta": {"manifest_sha_v2": "a" * 12}},
     ]
     monkeypatch.setattr(server, "read_results", lambda: rows)
-    monkeypatch.setattr(server, "MODELS", [{"id": "pro"}])
+    monkeypatch.setattr(server, "MODELS", [{"id": "adv"}])
     monkeypatch.setattr(server, "RETIRED_MODELS", ["legacy-pro"])
     monkeypatch.setattr(server, "DATASETS", [{"id": "aishell", "name": "AISHELL-1"}])
     out = server.review_results()

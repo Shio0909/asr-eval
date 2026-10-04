@@ -14,7 +14,7 @@ spec.loader.exec_module(logconf)
 def test_request_preview_keeps_form_fields_and_hides_token_and_audio():
     preview = logconf.build_request_preview(
         "POST",
-        "http://h.example.test/api/v2/asr/normal",
+        "http://h.example.test/api/asr/std",
         {
             "headers": {
                 "Authorization": "Bearer real-secret-token",

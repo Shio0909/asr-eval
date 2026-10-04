@@ -431,7 +431,7 @@ def save_pcm_wav(pcm: bytes, path: str, sr: int = 16000) -> str:
 def save_tts_audio(raw: bytes, path_noext: str, sr: int = 16000) -> str:
     """译后语音落盘，按字节头自动识别格式：MP3/WAV 原样存，裸 PCM 包成 wav。返回实际路径(带扩展名)。
 
-    各家 TTS 编码不一(v2=MP3、讯飞/qwen 多为裸 PCM)，统一用这个免得当 PCM 错包。
+    各家 TTS 编码不一(平台=MP3、讯飞/qwen 多为裸 PCM)，统一用这个免得当 PCM 错包。
     """
     if not raw:
         return ""
@@ -591,7 +591,7 @@ _TEXT_INPUT_JSON = {
 }
 
 BUILTIN_REQUEST_CONTRACTS = {
-    "lite": {"source": "lite-openapi", "status": "verified", "kind": "endpoint",
+    "light": {"source": "light-openapi", "status": "verified", "kind": "endpoint",
              "endpoint": "/asr_lite", "protocol": "http-multipart",
              "verified_version": "0.2.0", "verified_at": "2026-08-03", "request_schema": [
         _LITE_AUDIO_FORM,
@@ -604,7 +604,7 @@ BUILTIN_REQUEST_CONTRACTS = {
         _task_field("hotwords", default="", managed_by="hotwords",
                     description="热词列表，逗号分隔。"),
     ]},
-    "lite-mlt": {"source": "lite-openapi", "status": "verified", "kind": "endpoint",
+    "light-mlt": {"source": "light-openapi", "status": "verified", "kind": "endpoint",
                   "endpoint": "/asr_mlt_nano", "protocol": "http-multipart",
                   "verified_version": "0.2.0", "verified_at": "2026-08-07", "request_schema": [
         _LITE_AUDIO_FORM,
@@ -621,17 +621,17 @@ BUILTIN_REQUEST_CONTRACTS = {
         _task_field("hotwords", default="", managed_by="hotwords",
                     description="热词列表，逗号分隔。"),
     ]},
-    "normal": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
-               "endpoint": "/api/v2/asr/normal", "protocol": "http-multipart",
+    "std": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
+               "endpoint": "/api/asr/std", "protocol": "http-multipart",
                "verified_version": "1.70.6", "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
         {"name": "enable_word_timestamps", "in": "form", "type": "boolean", "default": False,
          "api_default": False, "eval_default": False,
-         "description": "启用字级时间戳，会额外调用 ASR Pro 强制对齐。"},
+         "description": "启用字级时间戳，会额外调用 高级档强制对齐。"},
         _LANGUAGE_FORM,
     ]},
-    "pro": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
-            "endpoint": "/api/v2/asr/pro", "protocol": "http-multipart",
+    "adv": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
+            "endpoint": "/api/asr/adv", "protocol": "http-multipart",
             "verified_version": "1.70.6", "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
         {"name": "enable_word_timestamps", "in": "form", "type": "boolean", "default": False,
@@ -650,8 +650,8 @@ BUILTIN_REQUEST_CONTRACTS = {
          "description": "仅在说话人识别开启时生效；0 表示禁用相邻同说话人合并。"},
         _LANGUAGE_FORM,
     ]},
-    "pro-domain": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
-                   "endpoint": "/api/v2/asr/pro-domain", "protocol": "http-multipart",
+    "adv-domain": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
+                   "endpoint": "/api/asr/adv-domain", "protocol": "http-multipart",
                    "verified_version": "1.70.6", "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
         {"name": "domain", "in": "form", "type": "string", "default": "medical",
@@ -665,8 +665,8 @@ BUILTIN_REQUEST_CONTRACTS = {
          "description": "额外热词 JSON 数组；adapter 会把评测热词转换为该字段。"},
         _LANGUAGE_FORM,
     ]},
-    "deepthink": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
-                  "endpoint": "/api/v2/asr/asr_input_stream_sse", "protocol": "http-sse",
+    "sse": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
+                  "endpoint": "/api/asr/sse", "protocol": "http-sse",
                   "verified_version": "1.70.6", "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
         _task_field("target_lang", enum=_PLAT_TARGET_LANGS, managed_by="target_lang"),
@@ -679,7 +679,7 @@ BUILTIN_REQUEST_CONTRACTS = {
         _LANGUAGE_FORM, _HOTWORDS_FORM,
     ]},
     "plat-minutes": {"source": "platform-openapi", "status": "verified", "kind": "endpoint",
-                   "endpoint": "/api/v2/asr/meeting-minutes", "protocol": "http-multipart",
+                   "endpoint": "/api/asr/meeting-minutes", "protocol": "http-multipart",
                    "verified_version": "1.70.6", "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
         _task_field("target_lang", enum=_PLAT_TARGET_LANGS, managed_by="target_lang"),
@@ -688,8 +688,8 @@ BUILTIN_REQUEST_CONTRACTS = {
         _LANGUAGE_FORM,
     ]},
     "plat-diar": {"source": "platform-openapi+adapter", "status": "verified",
-                "kind": "evaluation_profile", "profile_of": "pro",
-                "endpoint": "/api/v2/asr/pro", "protocol": "http-multipart",
+                "kind": "evaluation_profile", "profile_of": "adv",
+                "endpoint": "/api/asr/adv", "protocol": "http-multipart",
                 "fixed_request": {"enable_speaker_diarization": True},
                 "verified_version": "1.70.6", "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
@@ -702,7 +702,7 @@ BUILTIN_REQUEST_CONTRACTS = {
         _LANGUAGE_FORM,
     ]},
     "plat-formula": {"source": "platform-openapi", "status": "no_editable_params",
-                   "kind": "endpoint", "endpoint": "/api/v2/text/tts_formula_helper",
+                   "kind": "endpoint", "endpoint": "/api/text/tts_formula_helper",
                    "protocol": "http-sse", "verified_version": "1.70.6",
                    "verified_at": "2026-08-03", "request_schema": [_TEXT_INPUT_JSON]},
     "sensevoice": {"source": "adapter", "status": "verified", "request_schema": [
@@ -719,7 +719,7 @@ BUILTIN_REQUEST_CONTRACTS = {
         _task_field("target_lang", location="json", managed_by="target_lang"),
     ]},
     "plat-simult": {"source": "platform-schema+adapter", "status": "verified",
-                   "kind": "endpoint", "endpoint": "/ws/v2/audio/simult-interpreting",
+                   "kind": "endpoint", "endpoint": "/ws/audio/simult-interpreting",
                    "protocol": "websocket-binary-pcm",
                    "fixed_request": {
                        "audio_setting": {"sample_rate": 16000, "format": "pcm", "channel": 1},
@@ -784,7 +784,7 @@ BUILTIN_REQUEST_CONTRACTS = {
     ]},
     "plat-simult-ws": {"source": "platform-schema+adapter", "status": "verified",
                      "kind": "evaluation_profile", "profile_of": "voice-input",
-                     "endpoint": "/ws/v2/audio/voice-input", "protocol": "websocket-binary-pcm",
+                     "endpoint": "/ws/audio/voice-input", "protocol": "websocket-binary-pcm",
                      "fixed_request": {
                          "audio_setting": {"sample_rate": 16000, "format": "pcm", "channel": 1},
                          "vad_setting": {"threshold": 0.5, "silence_duration": 600,
@@ -821,7 +821,7 @@ BUILTIN_REQUEST_CONTRACTS = {
     ]},
     "plat-simult-post": {"source": "platform-openapi", "status": "verified",
                        "kind": "hidden_legacy_endpoint",
-                       "endpoint": "/api/v2/asr/simult-interpreting-sse",
+                       "endpoint": "/api/asr/simult-interpreting-sse",
                        "protocol": "http-sse", "verified_version": "1.70.6",
                        "verified_at": "2026-08-03", "request_schema": [
         _AUDIO_FILE_FORM,
@@ -871,27 +871,27 @@ BUILTIN_REQUEST_CONTRACTS = {
 # 能力契约描述“接口真实能做什么”；与 request_schema（用户能改什么）分离。
 # 未核实的限制保留 unknown，而不是根据 adapter 能绕到的其他端点推导能力。
 BUILTIN_CAPABILITY_CONTRACTS = {
-    "lite": {"status": "verified", "source": "lite-openapi", "kind": "endpoint",
+    "light": {"status": "verified", "source": "light-openapi", "kind": "endpoint",
              "endpoint": "/asr_lite", "verified_version": "0.2.0",
              "tasks": ["asr"], "input_modalities": ["audio_file"],
              "output_modalities": ["final_text"],
              "features": {"hotwords": True, "domain": False, "itn": True,
                           "timestamps": False}},
-    "lite-mlt": {"status": "verified", "source": "lite-openapi", "kind": "endpoint",
+    "light-mlt": {"status": "verified", "source": "light-openapi", "kind": "endpoint",
                   "endpoint": "/asr_mlt_nano", "verified_version": "0.2.0",
                   "tasks": ["asr"], "input_modalities": ["audio_file"],
                   "output_modalities": ["final_text"],
                   "features": {"hotwords": True, "domain": False, "itn": True,
                                "timestamps": False}},
-    "normal": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
-               "endpoint": "/api/v2/asr/normal", "verified_version": "1.70.6",
+    "std": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
+               "endpoint": "/api/asr/std", "verified_version": "1.70.6",
                "tasks": ["asr"], "input_modalities": ["audio_file"],
                "output_modalities": ["final_text", "utterances", "audio_info", "word_timestamps"],
                "output_conditions": {"word_timestamps": "enable_word_timestamps=true"},
                "features": {"hotwords": False, "domain": False, "diarization": False,
                             "speech_translation": False}},
-    "pro": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
-            "endpoint": "/api/v2/asr/pro", "verified_version": "1.70.6",
+    "adv": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
+            "endpoint": "/api/asr/adv", "verified_version": "1.70.6",
             "tasks": ["asr", "speech_translation"], "input_modalities": ["audio_file"],
             "output_modalities": ["result", "raw_result", "alt_result", "translation",
                                   "word_timestamps", "speaker_segments", "speaker_overlap",
@@ -902,8 +902,8 @@ BUILTIN_CAPABILITY_CONTRACTS = {
             "features": {"hotwords": False, "domain": False, "diarization": True,
                          "overlap_detection": True, "word_timestamps": True,
                          "degraded_status": True}},
-    "pro-domain": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
-                   "endpoint": "/api/v2/asr/pro-domain", "verified_version": "1.70.6",
+    "adv-domain": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
+                   "endpoint": "/api/asr/adv-domain", "verified_version": "1.70.6",
                    "tasks": ["asr", "speech_translation"], "input_modalities": ["audio_file"],
                    "output_modalities": ["edited_text", "utterances", "translation",
                                          "word_timestamps", "audio_info"],
@@ -945,8 +945,8 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                     "features": {"hotwords": False, "diarization": False, "timestamps": False,
                                  "base64_json_audio_frames": True, "binary_frames": False,
                                  "explicit_done_event": False}},
-    "deepthink": {"status": "verified", "source": "platform-openapi+adapter", "kind": "endpoint",
-                  "endpoint": "/api/v2/asr/asr_input_stream_sse", "verified_version": "1.70.6",
+    "sse": {"status": "verified", "source": "platform-openapi+adapter", "kind": "endpoint",
+                  "endpoint": "/api/asr/sse", "verified_version": "1.70.6",
                   "tasks": ["asr", "speech_translation"], "input_modalities": ["audio_file"],
                   "output_modalities": ["raw_text", "edited_text", "translation", "sop_actions",
                                         "formatting_metadata", "processing_stats"],
@@ -956,7 +956,7 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                   "features": {"hotwords": True, "dual_result": True, "sop": True,
                                "record_only": True, "abbreviations": True}},
     "plat-simult": {"status": "verified", "source": "platform-schema+adapter", "kind": "endpoint",
-                  "endpoint": "/ws/v2/audio/simult-interpreting",
+                  "endpoint": "/ws/audio/simult-interpreting",
                   "tasks": ["simultaneous_translation"], "input_modalities": ["audio_stream"],
                   "output_modalities": ["incremental_translation", "segment_final_translation",
                                         "translated_audio", "source_audio", "segment_timings",
@@ -982,7 +982,7 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                                "partial_on_disconnect": True}},
     "plat-simult-ws": {"status": "verified", "source": "platform-schema+adapter",
                      "kind": "evaluation_profile", "profile_of": "voice-input",
-                     "endpoint": "/ws/v2/audio/voice-input",
+                     "endpoint": "/ws/audio/voice-input",
                      "tasks": ["simultaneous_translation"], "input_modalities": ["audio_stream"],
                      "output_modalities": ["source_segment_text", "segment_final_translation",
                                            "segment_timings", "final_summary"],
@@ -997,7 +997,7 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                      "features": {"hotwords": False, "abbreviations": False,
                                   "tts": False, "partial_on_disconnect": True}},
     "plat-minutes": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
-                   "endpoint": "/api/v2/asr/meeting-minutes", "verified_version": "1.70.6",
+                   "endpoint": "/api/asr/meeting-minutes", "verified_version": "1.70.6",
                    "tasks": ["meeting_summary"], "input_modalities": ["audio_file"],
                    "output_modalities": ["markdown_summary", "transcript", "speaker_segments",
                                          "translation", "topics", "decisions", "participants",
@@ -1006,15 +1006,15 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                    "features": {"diarization": True, "long_audio": True,
                                 "structured_analysis": True}},
     "plat-formula": {"status": "verified", "source": "platform-openapi", "kind": "endpoint",
-                   "endpoint": "/api/v2/text/tts_formula_helper", "verified_version": "1.70.6",
+                   "endpoint": "/api/text/tts_formula_helper", "verified_version": "1.70.6",
                    "tasks": ["formula_normalization"], "input_modalities": ["text"],
                    "output_modalities": ["incremental_spoken_text", "spoken_text"],
                    "response_events": ["start", "token", "done", "error"],
                    "streaming": {"transport": "sse", "input": False, "output": True,
                                  "granularity": "token"}},
     "plat-diar": {"status": "verified", "source": "platform-openapi+adapter",
-                "kind": "evaluation_profile", "profile_of": "pro",
-                "endpoint": "/api/v2/asr/pro", "tasks": ["diarization"],
+                "kind": "evaluation_profile", "profile_of": "adv",
+                "endpoint": "/api/asr/adv", "tasks": ["diarization"],
                 "input_modalities": ["audio_file"],
                 "output_modalities": ["speaker_segments", "speaker_overlap", "diarization_backend",
                                       "pipeline_status"],
@@ -1022,7 +1022,7 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                 "features": {"speaker_merge": True, "overlap_detection": True, "long_audio": True}},
     "plat-simult-post": {"status": "verified", "source": "platform-openapi",
                        "kind": "hidden_legacy_endpoint",
-                       "endpoint": "/api/v2/asr/simult-interpreting-sse",
+                       "endpoint": "/api/asr/simult-interpreting-sse",
                        "verified_version": "1.70.6", "tasks": ["speech_translation"],
                        "input_modalities": ["audio_file"],
                        "output_modalities": ["incremental_translation", "final_translation",
@@ -1041,7 +1041,7 @@ BUILTIN_CAPABILITY_CONTRACTS = {
                    "input_modalities": ["text"], "output_modalities": ["final_text"]},
     "cascade-gemma": {"status": "verified", "source": "adapter", "tasks": ["speech_translation"],
                     "input_modalities": ["audio_file"], "output_modalities": ["translation", "intermediate_asr_text"],
-                    "pipeline": ["ext-pro", "gemma-text"]},
+                    "pipeline": ["ext-adv", "gemma-text"]},
     "qwen-simult": {"status": "verified", "source": "adapter", "tasks": ["simultaneous_translation"],
                     "input_modalities": ["audio_stream"], "output_modalities": ["incremental_text", "final_text"],
                     "language_pairs": [{"source": ["en", "zh", "ja", "ko", "es", "yue", "fr", "de", "ru"],
@@ -1077,8 +1077,8 @@ TEMPLATE_REQUEST_CONTRACTS = {
         _HOTWORDS_FORM,
     ]},
     "sensevoice": BUILTIN_REQUEST_CONTRACTS["sensevoice"],
-    "plat-sse": BUILTIN_REQUEST_CONTRACTS["deepthink"],
-    "plat-sse-dual": BUILTIN_REQUEST_CONTRACTS["deepthink"],
+    "plat-sse": BUILTIN_REQUEST_CONTRACTS["sse"],
+    "plat-sse-dual": BUILTIN_REQUEST_CONTRACTS["sse"],
     "openai-audio": {"source": "template", "status": "template_default", "request_schema": [
         _task_field("language", default="auto", managed_by="language"),
         _task_field("target_language", managed_by="target_lang"),
@@ -1118,8 +1118,8 @@ def request_contract_for(model_id="", cfg=None):
         return BUILTIN_REQUEST_CONTRACTS[model_id]
     template = cfg.get("template") or cfg.get("tmpl") or ""
     if template == "plat-multipart":
-        path = str(cfg.get("path") or "pro").strip("/").rsplit("/", 1)[-1]
-        contract = BUILTIN_REQUEST_CONTRACTS.get(path, BUILTIN_REQUEST_CONTRACTS["pro"])
+        path = str(cfg.get("path") or "adv").strip("/").rsplit("/", 1)[-1]
+        contract = BUILTIN_REQUEST_CONTRACTS.get(path, BUILTIN_REQUEST_CONTRACTS["adv"])
         endpoint = str(cfg.get("base_url") or cfg.get("url") or cfg.get("endpoint") or "")
         return contract if _is_platform_endpoint(endpoint) else {
             **contract, "source": "plat-template", "status": "template_default",
@@ -1196,7 +1196,7 @@ class SenseVoiceAdapter:
             return TranscribeResult(text="", elapsed_s=0.0, extra={}, ok=False, error=str(e))
 
 
-class LiteASRAdapter:
+class LightASRAdapter:
     """轻量 ASR 服务 — POST /asr_lite 或 /asr_mlt_nano。
 
     支持 hotwords → 可测 ASR 场景 b(自有提示词)。不同 base_url 可对应不同后端。
@@ -1360,17 +1360,17 @@ class CustomHTTPASRAdapter:
 
 
 # 端点预设
-def ext_pro(**kw):
-    return LiteASRAdapter(ENDPOINTS["ext_pro"], name="asr-pro", **kw)
+def ext_adv(**kw):
+    return LightASRAdapter(ENDPOINTS["ext_adv"], name="asr-adv", **kw)
 
 
-def lite_fun512(**kw):
-    return LiteASRAdapter(ENDPOINTS["lite"], name="asr-lite", **kw)
+def light_fun512(**kw):
+    return LightASRAdapter(ENDPOINTS["light"], name="asr-lite", **kw)
 
 
-def lite_mlt_nano(**kw):
-    return LiteASRAdapter(
-        ENDPOINTS["lite"], name="asr-mlt-nano", path="/asr_mlt_nano", **kw,
+def light_mlt_nano(**kw):
+    return LightASRAdapter(
+        ENDPOINTS["light"], name="asr-mlt-nano", path="/asr_mlt_nano", **kw,
     )
 
 
@@ -1420,7 +1420,7 @@ class QwenASRAdapter:
     ⚠️ Flash 是 Qwen3-ASR 家族的独立商用 API 版（技术报告：Qwen3-ASR-Flash-1208 serves as
     an API），分数高于开源 Qwen3-ASR-1.7B/0.6B，阿里不公开其参数量——勿当"1.7B 小模型"对标。
     音频 <10MB、≤5min。语言经 asr_options.language 传（auto 则不带，让其自检）。
-    口径对齐：enable_itn=false（与我们 v2/v3 一致）。返回在 choices[0].message.content。
+    口径对齐：enable_itn=false（与平台一致）。返回在 choices[0].message.content。
     """
     name = "qwen-asr"
     per_item_lang = True  # 按行内 lang 传 asr_options.language 提升准确率
@@ -1544,8 +1544,8 @@ class GemmaTextAdapter:
             return TranscribeResult(text="", elapsed_s=0.0, extra={}, ok=False, error=str(e))
 
 
-class CascadeLiteGemmaAdapter:
-    """级联语音翻译：ext-pro 转写 → gemma 文本翻译。
+class CascadeLightGemmaAdapter:
+    """级联语音翻译：ext-adv 转写 → gemma 文本翻译。
 
     用于带 audio_path 的 translate 清单(如 FLEURS)。和 gemma-text(直接拿
     source_text 转写文本去翻)对比，差值就是 ASR 误差对翻译的损耗。
@@ -1554,7 +1554,7 @@ class CascadeLiteGemmaAdapter:
     name = "cascade-gemma"
 
     def __init__(self, timeout: float = 120.0):
-        self.asr = ext_pro(timeout=timeout)
+        self.asr = ext_adv(timeout=timeout)
         self.mt = GemmaTextAdapter(timeout=timeout)
         self.url = f"{self.asr.url} → {self.mt.url}"
 
@@ -1574,28 +1574,28 @@ class PlatformASRAdapter:
     """自托管 ASR 平台（HTTP multipart）— 被测主体。
 
     一个服务的多个独立 multipart 同步端点；adapter 实例绑定单一端点，不跨身份换路由：
-      - ASR    : POST /api/v2/asr/{pro|normal|turbo}  pro 带 enable_text_edit=false(对齐口径)
-      - 翻译   : POST /api/v2/asr/{pro|turbo}  target_lang=X，逐句 utterances[].translation 拼接
-      - 热词   : 仅独立 PlatformProDomainAdapter → POST /api/v2/asr/pro-domain
+      - ASR    : POST /api/asr/{adv|std|compat}  adv 带 enable_text_edit=false(对齐口径)
+      - 翻译   : POST /api/asr/{adv|compat}  target_lang=X，逐句 utterances[].translation 拼接
+      - 热词   : 仅独立 PlatformAdvDomainAdapter → POST /api/asr/adv-domain
     base_url 参数化 → 同协议换台机器只改 url；endpoint 参数化 → 一个 adapter 测三个接口。
     """
-    name = "pro"
+    name = "adv"
     supports_hotwords = False
     _LANG = _LANG_PLATFORM  # 中文名→平台英文语言名(模块级常量)
 
     def __init__(self, base_url=ENDPOINTS["platform"], timeout=90.0,
-                 domain=None, endpoint="pro", api_key=None):
+                 domain=None, endpoint="adv", api_key=None):
         self.base = base_url.rstrip("/")
-        if "/api/v2/asr/" in self.base:
-            self.base = self.base.split("/api/v2/asr/", 1)[0]
-        self.endpoint = endpoint                          # pro | normal | turbo
+        if "/api/asr/" in self.base:
+            self.base = self.base.split("/api/asr/", 1)[0]
+        self.endpoint = endpoint                          # adv | std | compat
         self.api_key = _plat_token(api_key)
-        if domain and endpoint != "pro-domain":
-            raise ValueError(f"{endpoint} 不支持 domain；请显式使用 pro-domain 接口")
+        if domain and endpoint != "adv-domain":
+            raise ValueError(f"{endpoint} 不支持 domain；请显式使用 adv-domain 接口")
         self.domain = domain or "medical"
-        self.url = f"{self.base}/api/v2/asr/{endpoint}"    # __meta__ 与真实请求端点一致
-        if endpoint != "pro":
-            self.name = endpoint  # normal | turbo(旧版)
+        self.url = f"{self.base}/api/asr/{endpoint}"    # __meta__ 与真实请求端点一致
+        if endpoint != "adv":
+            self.name = endpoint  # std | compat(旧版)
         self.timeout = timeout
 
     def _post(self, path, audio_path, fields):
@@ -1616,23 +1616,23 @@ class PlatformASRAdapter:
     def transcribe(self, audio_path, language="auto", hotwords="", target_lang="") -> "TranscribeResult":
         try:
             tgt = self._LANG.get(target_lang, target_lang) if target_lang else ""
-            if self.endpoint == "pro-domain":
+            if self.endpoint == "adv-domain":
                 hw = [w for w in hotwords.replace(",", " ").split() if w]
                 fields = {"domain": self.domain, "language": language or "auto",
                           "hot_words": __import__("json").dumps(hw, ensure_ascii=False)}
                 if tgt:
                     fields["target_lang"] = tgt
-                d, el = self._post("/api/v2/asr/pro-domain",
+                d, el = self._post("/api/asr/adv-domain",
                                    audio_path, fields)
             else:
                 if hotwords:
-                    raise ValueError(f"{self.endpoint} 不支持 hotwords；请显式使用 pro-domain 接口")
-                if tgt and self.endpoint == "normal":
-                    raise ValueError("normal 不支持语音翻译；请使用 pro 或 pro-domain 接口")
+                    raise ValueError(f"{self.endpoint} 不支持 hotwords；请显式使用 adv-domain 接口")
+                if tgt and self.endpoint == "std":
+                    raise ValueError("std 不支持语音翻译；请使用 adv 或 adv-domain 接口")
                 fields = {"enable_text_edit": "false", "language": language or "auto"}
                 if tgt:
                     fields["target_lang"] = tgt
-                d, el = self._post(f"/api/v2/asr/{self.endpoint}", audio_path, fields)
+                d, el = self._post(f"/api/asr/{self.endpoint}", audio_path, fields)
             result = d.get("result", {})
             translated = "".join(u.get("translation", "") for u in result.get("utterances", [])).strip()
             return TranscribeResult(text=translated if tgt and translated else result.get("text", ""),
@@ -1644,22 +1644,22 @@ class PlatformASRAdapter:
         """音频→译文（FLEURS 等带 audio_path 的 translate 清单）。"""
         if not item.get("audio_path"):
             return TranscribeResult(text="", elapsed_s=0.0, extra={}, ok=False,
-                                    error="pro 翻译需要 audio_path（语音翻译），该清单无音频")
+                                    error="adv 翻译需要 audio_path（语音翻译），该清单无音频")
         try:
             tgt = self._LANG.get(item.get("target_lang", "英文"), item.get("target_lang", "English"))
-            if self.endpoint not in ("pro", "turbo", "pro-domain"):
+            if self.endpoint not in ("adv", "compat", "adv-domain"):
                 return TranscribeResult(text="", elapsed_s=0.0, extra={}, ok=False,
                                         error=f"{self.endpoint} 不支持语音翻译")
             fields = {"target_lang": tgt}
             if item.get("request_language") and item["request_language"] != "auto":
                 fields["language"] = item["request_language"]
-            if self.endpoint == "pro-domain":
+            if self.endpoint == "adv-domain":
                 fields["domain"] = self.domain
                 fields["hot_words"] = json.dumps(
                     [w for w in str(item.get("hotwords") or "").replace(",", " ").split() if w],
                     ensure_ascii=False,
                 )
-            d, el = self._post(f"/api/v2/asr/{self.endpoint}", item["audio_path"], fields)
+            d, el = self._post(f"/api/asr/{self.endpoint}", item["audio_path"], fields)
             utts = d.get("result", {}).get("utterances", [])
             text = "".join(u.get("translation", "") for u in utts).strip() \
                 or d.get("result", {}).get("text", "")
@@ -2064,24 +2064,24 @@ class Qwen3ASRWSAdapter:
                     pass
 
 
-class PlatformProDomainAdapter(PlatformASRAdapter):
-    """Dedicated identity for /pro-domain; never masquerades as Normal or Pro."""
-    name = "pro-domain"
+class PlatformAdvDomainAdapter(PlatformASRAdapter):
+    """Dedicated identity for /adv-domain; never masquerades as Standard or Advanced."""
+    name = "adv-domain"
     supports_hotwords = True
 
     def __init__(self, base_url=ENDPOINTS["platform"], timeout=90.0, domain=None, api_key=None):
         super().__init__(base_url=base_url, timeout=timeout, domain=domain,
-                         endpoint="pro-domain", api_key=api_key)
+                         endpoint="adv-domain", api_key=api_key)
 
 
 class PlatformSSEAdapter:
     """平台的 SSE 流式接口（POST 上传 → text/event-stream 逐事件返回）：
-      - mode="sse"    : /api/v2/asr/asr_input_stream_sse  流式识别
-      - mode="simult" : /api/v2/asr/simult-interpreting-sse  同声传译(target_lang 必填)
+      - mode="sse"    : /api/asr/sse  流式识别
+      - mode="simult" : /api/asr/simult-interpreting-sse  同声传译(target_lang 必填)
     精度口径：识别用 asr_result 事件的原始文本(等价 enable_text_edit=false)；
     流式专属指标：extra.ttfb_s = 发出请求 → 首个含文字事件（score 聚合成 ttfb_p50_s）。
     """
-    name = "deepthink"
+    name = "sse"
     supports_hotwords = True   # 接口原生 hotwords 逗号分隔参数
     _LANG = _LANG_PLATFORM
 
@@ -2089,8 +2089,8 @@ class PlatformSSEAdapter:
                  audio_out_dir=None, api_key=None):
         self.base = base_url.rstrip("/")
         self.mode = mode
-        path = ("/api/v2/asr/asr_input_stream_sse" if mode == "sse"
-                else "/api/v2/asr/simult-interpreting-sse")
+        path = ("/api/asr/sse" if mode == "sse"
+                else "/api/asr/simult-interpreting-sse")
         self.url = self.base + path
         if mode != "sse":
             self.name = "plat-simult"
@@ -2196,7 +2196,7 @@ class PlatformSSEAdapter:
 
 
 class PlatformMinutesAdapter:
-    """会议纪要(离线) — POST /api/v2/asr/meeting-minutes，长音频 → Markdown 纪要。
+    """会议纪要(离线) — POST /api/asr/meeting-minutes，长音频 → Markdown 纪要。
 
     响应取 render.final_summary.markdown。单场会议 15-30 分钟音频，
     服务端三段式处理（ASR→说话人→纪要生成），耗时数分钟级 → 超时给足。
@@ -2206,7 +2206,7 @@ class PlatformMinutesAdapter:
 
     def __init__(self, base_url=ENDPOINTS["platform"], timeout=1200.0, api_key=None):
         self.base = base_url.rstrip("/")
-        self.url = self.base + "/api/v2/asr/meeting-minutes"
+        self.url = self.base + "/api/asr/meeting-minutes"
         self.timeout = timeout
         self.headers = _bearer_headers(_plat_token(api_key))
 
@@ -2242,13 +2242,13 @@ class PlatformMinutesAdapter:
 
 
 class PlatformDiarAdapter:
-    """说话人分离 — POST /api/v2/asr/pro + enable_speaker_diarization,返回带 speaker_id 的分段。
+    """说话人分离 — POST /api/asr/adv + enable_speaker_diarization,返回带 speaker_id 的分段。
     分段(秒)编码进 text(JSON),score 用 pyannote DER 对 TextGrid 参考算分。长音频,超时给足。"""
     name = "plat-diar"
 
     def __init__(self, base_url=ENDPOINTS["platform"], timeout=1200.0, api_key=None):
         self.base = base_url.rstrip("/")
-        self.url = self.base + "/api/v2/asr/pro"
+        self.url = self.base + "/api/asr/adv"
         self.timeout = timeout
         self.headers = _bearer_headers(_plat_token(api_key))
 
@@ -2277,7 +2277,7 @@ class PlatformDiarAdapter:
 
 
 class PlatformFormulaAdapter:
-    """TTS 公式转写 — POST /api/v2/text/tts_formula_helper (JSON {text}) → token SSE。
+    """TTS 公式转写 — POST /api/text/tts_formula_helper (JSON {text}) → token SSE。
 
     文本→口语化朗读文本。打分口径：字级 CER 对 golden 理想转译（诊断集 8 条）。
     """
@@ -2285,7 +2285,7 @@ class PlatformFormulaAdapter:
 
     def __init__(self, base_url=ENDPOINTS["platform"], timeout=180.0, api_key=None):
         self.base = base_url.rstrip("/")
-        self.url = self.base + "/api/v2/text/tts_formula_helper"
+        self.url = self.base + "/api/text/tts_formula_helper"
         self.timeout = timeout
         self.headers = _bearer_headers(_plat_token(api_key))
 
@@ -2913,11 +2913,11 @@ class XfSparkSlmIatAdapter:
 
 
 class PlatformWSVoiceInputAdapter:
-    """v2 平台「语音输入」WS 流式（/ws/v2/audio/voice-input）→ **真流式同传**。
+    """平台「语音输入」WS 流式（/ws/audio/voice-input）→ **真流式同传**。
 
     专门的 simult-interpreting 只有 POST 单发(whole-file，算不了 AL)；此 WS 端点
     voice_input_setting.target_language 开翻译，逐段 result_final.data.translation 增量出译文，
-    1x 喂可算真 AL/LAAL，对齐 qwen/xf 口径。被测主体 v2 的真同传版(此前 WSAdapter 方案搁置，现启用)。
+    1x 喂可算真 AL/LAAL，对齐 qwen/xf 口径。被测主体平台的真同传版(此前 WSAdapter 方案搁置，现启用)。
     流程：connected_success → task_start → 二进制 PCM → result_final → task_finish。
     """
     name = "plat-simult-ws"
@@ -2933,7 +2933,7 @@ class PlatformWSVoiceInputAdapter:
 
     def __init__(self, base_url=ENDPOINTS["platform"], timeout=180.0, pace=True, api_key=None):
         self.ws_url = (base_url.replace("http://", "ws://").replace("https://", "wss://").rstrip("/")
-                       + "/ws/v2/audio/voice-input")
+                       + "/ws/audio/voice-input")
         self.timeout = timeout
         self.pace = pace
         token = _plat_token(api_key)
@@ -2962,7 +2962,7 @@ class PlatformWSVoiceInputAdapter:
 
     def generate(self, item) -> "TranscribeResult":
         if not item.get("audio_path"):
-            return TranscribeResult("", 0.0, {}, ok=False, error="v2 WS 同传需要 audio_path")
+            return TranscribeResult("", 0.0, {}, ok=False, error="平台 WS 同传需要 audio_path")
         try:
             import threading
 
@@ -3088,7 +3088,7 @@ class PlatformWSVoiceInputAdapter:
 
 
 class PlatformWSSimultAdapter:
-    """v2 平台 同声传译 WS 流式（/ws/v2/audio/simult-interpreting，nxdong 部署）— 真流式同传 + TTS。
+    """平台同声传译 WS 流式（/ws/audio/simult-interpreting）— 真流式同传 + TTS。
 
     一个端点全给：si_token 增量译文(算 AL) + si_segment_done(终稿 + 服务端 timings) +
     si_tts_file(译后语音 mp3) + si_source_audio(分段源音频)。task_start/task_finish 协议。
@@ -3106,7 +3106,7 @@ class PlatformWSSimultAdapter:
             raise RuntimeError("plat-simult 未配置端点：看板「接口管理」编辑 plat-simult 填 WS 地址即可；"
                                "CLI/容器跑则设 ASR_PLATFORM_WS_URL 环境变量（私有隧道地址不入仓）")
         self.ws_url = (base_url.replace("https://", "wss://").replace("http://", "ws://").rstrip("/")
-                       + "/ws/v2/audio/simult-interpreting")
+                       + "/ws/audio/simult-interpreting")
         self.timeout = timeout
         self.pace = pace
         self.audio_out_dir = audio_out_dir
@@ -3155,7 +3155,7 @@ class PlatformWSSimultAdapter:
 
     def generate(self, item) -> "TranscribeResult":
         if not item.get("audio_path"):
-            return TranscribeResult("", 0.0, {}, ok=False, error="v2 WS 同传需要 audio_path")
+            return TranscribeResult("", 0.0, {}, ok=False, error="平台 WS 同传需要 audio_path")
         try:
             import threading
 
@@ -3385,7 +3385,7 @@ class PlatformWSSimultAdapter:
                 )
             finally:
                 ws.close()
-            # 正常取 si_segment_done 的终稿；若服务端定稿卡住（如 nxdong 中文 TTS 回归：
+            # 正常取 si_segment_done 的终稿；若服务端定稿卡住（如中文 TTS 回归：
             # en→zh + tts.enable=True 时 token 照来但 si_segment_done 不出、TTS 也不出），
             # 退而用 si_token 增量拼回译文——译文/AL 不丢，只是没有终稿级标点修订与 TTS 音频。
             text = " ".join(finals).strip()
@@ -3666,10 +3666,10 @@ class WhisperLocalAdapter:
 ADAPTERS = {
     "whisper-local": WhisperLocalAdapter,   # 本地纯 ASR(tts_err 回转用,替代会翻译的多语模型)
     "sensevoice": SenseVoiceAdapter,   # 阿里 SenseVoice 基线
-    "ext-pro": ext_pro,            # asr_lite 协议的第二个端点
+    "ext-adv": ext_adv,            # asr_lite 协议的第二个端点
     "gemma-audio": GemmaAudioAdapter,  # gemma LLM 式 ASR
     "gemma-text": GemmaTextAdapter,    # gemma 文本翻译/总结
-    "cascade-gemma": CascadeLiteGemmaAdapter,  # 级联语音翻译 ASR→MT
+    "cascade-gemma": CascadeLightGemmaAdapter,  # 级联语音翻译 ASR→MT
     "doubao-simult": DoubaoSimultAdapter,      # 竞品同传：豆包 Seed LiveInterpret 2.0(protobuf WS)
     "qwen-simult": QwenLiveTranslateAdapter,  # 竞品同传：Qwen3.5-LiveTranslate(Realtime 协议, Bearer)
     "qwen-simult-offline": lambda **kw: QwenLiveTranslateAdapter(pace=False, **kw),  # 不限速版=质量保留率分母
@@ -3680,16 +3680,16 @@ ADAPTERS = {
     #    分数高于开源 Qwen3-ASR-1.7B/0.6B，非同一模型；阿里不公开其参数量。音频 <10MB、≤5min。
     "qwen-asr": QwenASRAdapter,
     # ★ 被测主体 = 四档模型
-    "lite": lite_fun512,             # asr_lite 协议
-    "lite-mlt": lite_mlt_nano,       # asr_mlt_nano 协议
-    "normal": lambda **kw: PlatformASRAdapter(endpoint="normal", **kw),  
-    "pro": PlatformASRAdapter,                                           
-    "pro-domain": PlatformProDomainAdapter,                              # 独立领域/热词端点，不借用 Normal/Pro 身份
-    "deepthink": PlatformSSEAdapter,                                     # SSE 接口
-    "deepthink-local": lambda **kw: PlatformSSEAdapter(
+    "light": light_fun512,             # asr_lite 协议
+    "light-mlt": light_mlt_nano,       # asr_mlt_nano 协议
+    "std": lambda **kw: PlatformASRAdapter(endpoint="std", **kw),  
+    "adv": PlatformASRAdapter,                                           
+    "adv-domain": PlatformAdvDomainAdapter,                              # 独立领域/热词端点，不借用 Standard/Advanced 身份
+    "sse": PlatformSSEAdapter,                                     # SSE 接口
+    "sse-local": lambda **kw: PlatformSSEAdapter(
         base_url="http://127.0.0.1:8000", api_key=kw.pop("api_key", ""), **kw
     ),  # 本地8000热词版本（显式不携带平台 Token）
-    "turbo": lambda **kw: PlatformASRAdapter(endpoint="turbo", **kw),    # 旧版(保留)
+    "compat": lambda **kw: PlatformASRAdapter(endpoint="compat", **kw),    # 旧版(保留)
     # ★ 挂在档位上的功能/场景接口（非独立档位）
     "plat-simult": PlatformWSSimultAdapter,                                   # 同声传译(WS 真流式+TTS，端点走 ASR_PLATFORM_WS_URL)
     "plat-simult-post": lambda **kw: PlatformSSEAdapter(mode="simult", **kw), # 旧 POST 单发版(无 AL,留作对照)
@@ -3838,9 +3838,9 @@ _TEMPLATES = {
                                               api_key=_resolve_key(c) or "sk-eval",
                                               prefix=c.get("path") or "/v1"),          # path=前缀
     "plat-multipart": lambda c: PlatformASRAdapter(base_url=c["base_url"],
-                                             endpoint=c.get("path") or "pro",
-                                             api_key=_resolve_key(c)),                 # path=pro/normal/turbo
-    "asr_lite": lambda c: LiteASRAdapter(
+                                             endpoint=c.get("path") or "adv",
+                                             api_key=_resolve_key(c)),                 # path=adv/std/compat
+    "asr_lite": lambda c: LightASRAdapter(
         c["base_url"], name=c["id"], default_itn=c.get("itn", False),
         return_timestamps=c.get("return_timestamps", False),
         path=c.get("path") or "/asr_lite"),

@@ -2,7 +2,7 @@
 # 测评数据集一键下载脚本
 # 用法: bash datasets/download.sh [phase_a|phase_b|phase_c|multilingual|open_asr|japanese|chuan_yu|all]
 #   phase_a  核心可白嫖集 (~5-7GB, 无需登录)
-#   phase_b  2026-06 调研新增: v2 接口补缺 (鲁棒性/会议/医疗/情感/声音事件/语音翻译, 直链已逐一核实)
+#   phase_b  2026-06 调研新增: 接口补缺 (鲁棒性/会议/医疗/情感/声音事件/语音翻译, 直链已逐一核实)
 #   phase_c  2026-06 二轮检索: 发音偏差/方言腔 (WSC-Eval/KeSpeech/Wu-Bench) + 翻译术语 (HardMTBench/WMT25) + CoVoST2 补拉
 #   multilingual  Qwen3-ASR 对数口径: FLEURS 12 语 + Common Voice 17 13 语（只下 test）
 #   open_asr  英文 Open ASR Leaderboard: AMI/Earnings22/GigaSpeech/SPGISpeech/VoxPopuli/TEDLIUM
@@ -166,7 +166,7 @@ PY
 }
 
 phase_b() {
-  echo "### Phase B: v2 接口补缺 (2026-06 调研, 来源逐一核实过) ###"
+  echo "### Phase B: 接口补缺 (2026-06 调研, 来源逐一核实过) ###"
 
   # --- ASR 鲁棒性诊断: Voices-in-the-Wild-Bench (MIT, 5k 条 zh2.5k/en2.5k, 8 类扰动含丢包/回声) ---
   hf download zhifeixie/Voices-in-the-Wild-Bench --repo-type dataset \

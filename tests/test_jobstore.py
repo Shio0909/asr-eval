@@ -6,10 +6,10 @@ def test_enqueued_batch_job_is_claimed_without_creating_duplicate(tmp_path, monk
 
     jobs_file = tmp_path / "jobs.json"
     monkeypatch.setattr(jobstore, "JOBS_FILE", str(jobs_file))
-    jid = jobstore.enqueue("normal", "commonvoice_en", workers=8, note="展示")
+    jid = jobstore.enqueue("std", "commonvoice_en", workers=8, note="展示")
 
     monkeypatch.setenv("BATCH_JOB", jid)
-    claimed = jobstore.start("normal", "commonvoice_en", workers=8, note="展示")
+    claimed = jobstore.start("std", "commonvoice_en", workers=8, note="展示")
     data = json.loads(jobs_file.read_text(encoding="utf-8"))
 
     assert claimed == jid

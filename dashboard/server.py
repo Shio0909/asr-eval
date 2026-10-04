@@ -421,21 +421,21 @@ def _is_platform_url(endpoint: str) -> bool:
     return bool(ep) and any(ep.startswith(d) for d in (_PLAT_DISPLAY, _PLAT_WS_DISPLAY) if d)
 MODELS = [
     # ── 被测主体 · 四档模型（id=档位名）──
-    {"id": "lite", "name": "Lite", "endpoint": "lite", "group": "iface", "unverified": True, "url": _ep_display("LITE_URL", "/asr_lite")},
-    {"id": "lite-mlt", "name": "Lite MLT · 多语种", "endpoint": "lite", "group": "iface", "url": _ep_display("LITE_URL", "/asr_mlt_nano")},
-    {"id": "normal", "name": "Normal", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/asr/normal", "key_env": _PLAT_KEY_ENV},
-    {"id": "pro", "name": "Pro", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/asr/pro", "key_env": _PLAT_KEY_ENV},
-    {"id": "pro-domain", "name": "Pro Domain · 领域专业识别", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/asr/pro-domain", "key_env": _PLAT_KEY_ENV},
-    {"id": "deepthink", "name": "DeepThink", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/asr/asr_input_stream_sse", "key_env": _PLAT_KEY_ENV, "dual_result": True},
-    # turbo(旧版)已从 UI 下架；adapter 保留可 CLI 跑。
+    {"id": "light", "name": "Lite", "endpoint": "light", "group": "iface", "unverified": True, "url": _ep_display("LIGHT_URL", "/asr_lite")},
+    {"id": "light-mlt", "name": "Lite MLT · 多语种", "endpoint": "light", "group": "iface", "url": _ep_display("LIGHT_URL", "/asr_mlt_nano")},
+    {"id": "std", "name": "Standard", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/std", "key_env": _PLAT_KEY_ENV},
+    {"id": "adv", "name": "Advanced", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/adv", "key_env": _PLAT_KEY_ENV},
+    {"id": "adv-domain", "name": "Advanced Domain · 领域专业识别", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/adv-domain", "key_env": _PLAT_KEY_ENV},
+    {"id": "sse", "name": "SSE", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/sse", "key_env": _PLAT_KEY_ENV, "dual_result": True},
+    # compat(旧版)已从 UI 下架；adapter 保留可 CLI 跑。
     # ── 被测主体 · 挂在档位上的功能/场景接口（非独立档位）──
     {"id": "plat-realtime", "name": "流式识别(WS /v1/realtime)", "model": "realtime-transcribe", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_WS_DISPLAY}/v1/realtime?model=realtime-transcribe", "key_env": _PLAT_KEY_ENV},
-    {"id": "plat-simult", "name": "同声传译(WS流式+TTS)", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_WS_DISPLAY}/ws/v2/audio/simult-interpreting", "key_env": _PLAT_KEY_ENV},
-    {"id": "plat-simult-ws", "name": "同声传译(WS真流式)", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/ws/v2/audio/voice-input", "key_env": _PLAT_KEY_ENV},
-    {"id": "plat-minutes", "name": "会议纪要(离线)", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/asr/meeting-minutes", "key_env": _PLAT_KEY_ENV},
-    {"id": "plat-formula", "name": "TTS 公式转写", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/text/tts_formula_helper", "key_env": _PLAT_KEY_ENV},
-    {"id": "plat-diar", "name": "说话人分离", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/v2/asr/pro+diarize", "key_env": _PLAT_KEY_ENV},
-        # ext-pro 已从 UI 下架；adapter 保留可 CLI 跑。
+    {"id": "plat-simult", "name": "同声传译(WS流式+TTS)", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_WS_DISPLAY}/ws/audio/simult-interpreting", "key_env": _PLAT_KEY_ENV},
+    {"id": "plat-simult-ws", "name": "同声传译(WS真流式)", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/ws/audio/voice-input", "key_env": _PLAT_KEY_ENV},
+    {"id": "plat-minutes", "name": "会议纪要(离线)", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/meeting-minutes", "key_env": _PLAT_KEY_ENV},
+    {"id": "plat-formula", "name": "TTS 公式转写", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/text/tts_formula_helper", "key_env": _PLAT_KEY_ENV},
+    {"id": "plat-diar", "name": "说话人分离", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/adv+diarize", "key_env": _PLAT_KEY_ENV},
+        # ext-adv 已从 UI 下架；adapter 保留可 CLI 跑。
     # ── 外部基线（竞品/开源对照）──
     # gemma-audio 已从 UI 下架；gemma-text/cascade-gemma(翻译/总结)保留。
     {"id": "sensevoice", "name": "SenseVoice (阿里)", "endpoint": "sensevoice", "group": "baseline", "url": _ep_display("SENSEVOICE_URL", "/api/asr_transcribe")},
@@ -452,7 +452,7 @@ MODELS = [
 
 # 翻译场景模型的输入类型：audio=语音翻译(需音频,跑 fleurs)，text=文本翻译(需 source_text,跑 flores/wmt)
 # 与数据集子类型(翻译·语音/翻译·文本)匹配 → 前端禁不兼容组合，杜绝"语音接口收到纯文本集"必然失败
-_TRANS_INPUT = {"pro": "audio", "pro-domain": "audio", "deepthink": "audio",
+_TRANS_INPUT = {"adv": "audio", "adv-domain": "audio", "sse": "audio",
                 "plat-simult": "audio", "plat-simult-ws": "audio",
                 "qwen-simult": "audio", "qwen-simult-offline": "audio", "xf-simult": "audio",
                 "xf-spark-slm-iat": "audio",
@@ -461,14 +461,14 @@ for _m in MODELS:
     if _m["id"] in _TRANS_INPUT:
         _m["trans_input"] = _TRANS_INPUT[_m["id"]]
 
-# 各场景可用模型（pro 是被测主体；翻译用其语音翻译，需带 audio_path 的清单如 FLEURS）
+# 各场景可用模型（adv 是被测主体；翻译用其语音翻译，需带 audio_path 的清单如 FLEURS）
 # 从 UI 下架但历史结果仍需归属的接口 id（文件名回退解析 + 前端 modelOf 共用）
-RETIRED_MODELS = ["turbo", "ext-pro", "gemma-audio"]
+RETIRED_MODELS = ["compat", "ext-adv", "gemma-audio"]
 
 SCENARIO_MODELS = {
-    "ASR": ["lite", "normal", "pro", "pro-domain", "deepthink", "sensevoice", "xf-spark-slm-iat", "qwen3-asr-ws"],
+    "ASR": ["light", "std", "adv", "adv-domain", "sse", "sensevoice", "xf-spark-slm-iat", "qwen3-asr-ws"],
     # ↑ 下架接口的 id 收进 RETIRED_MODELS（见下），历史结果文件名解析仍可归属
-    "翻译": ["pro", "pro-domain", "deepthink", "qwen-simult-offline", "gemma-text", "cascade-gemma"],   # 文本/离线语音翻译(只看 chrF)
+    "翻译": ["adv", "adv-domain", "sse", "qwen-simult-offline", "gemma-text", "cascade-gemma"],   # 文本/离线语音翻译(只看 chrF)
     # 同传:语音→译文的"边说边译",独立场景,看延迟(AL/LAAL/ttfb)+质量(chrF)+译后语音保真(tts_err)。
     # 数据集走 simul 标记(语音翻译集,与「翻译·语音」共用集但口径不同)。
     "同传": ["plat-simult", "qwen-simult", "doubao-simult", "xf-simult", "plat-simult-ws"],
@@ -633,7 +633,7 @@ def _now_iso():
 
 
 # 延迟模式按「端点」分锁，防止同一后端互相污染；精度模式按「模型」分锁，
-# 允许 normal/pro/deepthink 并行，但同一模型仍逐数据集串行，避免一次派发把端点打满。
+# 允许 std/adv/sse 并行，但同一模型仍逐数据集串行，避免一次派发把端点打满。
 _EP_LOCKS = {}
 _EP_GLOBAL = threading.Lock()
 
@@ -805,13 +805,13 @@ def read_results():
                         break
             meta = s.get("meta") or {}
             normal_route_polluted = (
-                (s.get("model") == "normal" or meta.get("model") == "normal")
+                (s.get("model") == "std" or meta.get("model") == "std")
                 and (bool(meta.get("hotwords") or meta.get("domain"))
                      or bool(re.search(r"(?:^|_)(?:hw|dom)(?:_|\.|$)", os.path.splitext(base)[0])))
             )
             if normal_route_polluted:
                 s["invalid_identity"] = True
-                s["invalid_reason"] = "历史 Normal 热词/领域任务实际路由到 pro-domain"
+                s["invalid_reason"] = "历史 Standard 热词/领域任务实际路由到 adv-domain"
                 s["low_coverage"] = True  # 沿用现有榜单排除通道；文件本身保留
             out.append(s)
         except Exception:
@@ -1000,7 +1000,7 @@ class RunReq(BaseModel):
     seed: int = 42            # 抽样种子(同种子→同样本，横评可复现)
     hotwords: bool = False    # 场景 b：manifest keywords 作热词传给模型
     hotwords_text: str = ""   # 每条样本都追加的自定义热词；与 manifest keywords 合并
-    domain: bool = False      # 领域提示词 A/B：仅独立 pro-domain 接口接受
+    domain: bool = False      # 领域提示词 A/B：仅独立 adv-domain 接口接受
     embedding: bool = False   # ASR 可选增强：embedding 语义相似度(score-only，不改 infer/文件名)
     comet: bool = False       # 翻译/同传可选增强：优先 GPU XCOMET-XL，本地 COMET 降级
     speech_eval: bool = False # 同传语音口径：开启 TTS + 回转/UTMOS/声线；默认文本口径关闭 TTS
@@ -1460,7 +1460,7 @@ def run(req: RunReq):
                      "scenarios": list(custom_cfg.get("scenarios") or ["ASR"])}
     model_caps = _model_caps(model_cfg)
     if req.domain and "domain" not in model_caps:
-        return JSONResponse({"error": f"{req.model} 不支持 domain；请使用独立的 pro-domain 接口"},
+        return JSONResponse({"error": f"{req.model} 不支持 domain；请使用独立的 adv-domain 接口"},
                             status_code=400)
     try:
         hotwords_text = req.hotwords_text.strip()
@@ -1615,7 +1615,7 @@ def _cli_request_preview(summary):
     model = spec.get("model") or meta.get("model") or ""
     language = spec.get("language") or meta.get("language") or "auto"
     form = dict(spec.get("request_params") or meta.get("request_params") or {})
-    if model != "deepthink" or language != "auto":
+    if model != "sse" or language != "auto":
         form.setdefault("language", language)
     kwargs = {
         "data": form,
@@ -1750,8 +1750,8 @@ def _custom_iface_base(cfg: dict, raw: str | None = None) -> str:
     """Return the service root even if an edit submitted the display endpoint."""
     base = (raw if raw is not None else cfg.get("base_url", "")).strip().rstrip("/")
     template = cfg.get("template", "")
-    if template == "plat-multipart" and "/api/v2/asr/" in base:
-        base = base.split("/api/v2/asr/", 1)[0]
+    if template == "plat-multipart" and "/api/asr/" in base:
+        base = base.split("/api/asr/", 1)[0]
     elif template in ("openai-audio", "openai-chat", "openai-chat-audio"):
         suffix = "/" + (cfg.get("path") or "/v1").strip("/")
         while suffix != "/" and base.endswith(suffix):
@@ -1766,7 +1766,7 @@ def _custom_iface_display_url(cfg: dict) -> str:
     display_base = base.removeprefix("http://").removeprefix("https://")
     path = (cfg.get("path") or "").strip()
     if cfg.get("template") == "plat-multipart":
-        return f"{display_base}/api/v2/asr/{path or 'pro'}"
+        return f"{display_base}/api/asr/{path or 'adv'}"
     if cfg.get("template") in ("openai-audio", "openai-chat", "openai-chat-audio"):
         suffix = path if path.startswith("/") else "/" + path if path else "/v1"
         return display_base + suffix
@@ -1851,7 +1851,7 @@ _TMPL_CAPS = {"openai-audio": ["asr"], "openai-chat-audio": ["asr"],
               "plat-multipart": ["asr"], "asr_lite": ["asr", "hotwords"],
               "sensevoice": ["asr"], "plat-sse": ["asr"], "openai-chat": ["translate_text", "summarize"],
               "custom-http-asr": ["asr", "translate_audio"]}
-_DOMAIN_MODELS = {"pro-domain"}
+_DOMAIN_MODELS = {"adv-domain"}
 _CAPS_CACHE = {}
 
 
@@ -1987,19 +1987,19 @@ _PLAT_LANGUAGE_SPEC = {
 
 _MODEL_LANGUAGE_SPECS = {
     # 活体：该服务的 FastAPI 枚举为 auto/中文/英文/日文；zh 会 422。
-    "lite": {"supported": True, "values": ["auto", "中文", "英文", "日文"],
+    "light": {"supported": True, "values": ["auto", "中文", "英文", "日文"],
              "note": "/asr_lite 使用中文枚举；不要填 zh/en。"},
-    "lite-mlt": {"supported": True,
+    "light-mlt": {"supported": True,
                  "values": ["auto", "中文", "英文", "粤语", "日文", "韩文", "越南语", "印尼语",
                             "泰语", "马来语", "菲律宾语", "阿拉伯语", "印地语", "保加利亚语",
                             "克罗地亚语", "捷克语", "丹麦语", "荷兰语", "爱沙尼亚语", "芬兰语",
                             "希腊语", "匈牙利语", "爱尔兰语", "拉脱维亚语", "立陶宛语", "马耳他语",
                             "波兰语", "葡萄牙语", "罗马尼亚语", "斯洛伐克语", "斯洛文尼亚语", "瑞典语"],
                  "note": "/asr_mlt_nano OpenAPI 枚举；使用中文语言名。"},
-    "normal": _PLAT_LANGUAGE_SPEC,
-    "pro": _PLAT_LANGUAGE_SPEC,
-    "pro-domain": _PLAT_LANGUAGE_SPEC,
-    "deepthink": _PLAT_LANGUAGE_SPEC,
+    "std": _PLAT_LANGUAGE_SPEC,
+    "adv": _PLAT_LANGUAGE_SPEC,
+    "adv-domain": _PLAT_LANGUAGE_SPEC,
+    "sse": _PLAT_LANGUAGE_SPEC,
     "sensevoice": {"supported": True, "default": "zh",
                    "values": ["zh", "en", "yue", "ja", "ko", "nospeech"],
                    "note": "作为 /api/asr_transcribe 的 language query 参数发送；该服务默认 zh，不声明 auto。"},
@@ -2093,18 +2093,18 @@ def _model_payload(m):
 
 
 _BUILTIN_ENV = {
-    "pro": "ASR_PLATFORM_URL",
-    "pro-domain": "ASR_PLATFORM_URL",
-    "normal": "ASR_PLATFORM_URL",
-    "turbo": "ASR_PLATFORM_URL",
-    "deepthink": "ASR_PLATFORM_URL",
+    "adv": "ASR_PLATFORM_URL",
+    "adv-domain": "ASR_PLATFORM_URL",
+    "std": "ASR_PLATFORM_URL",
+    "compat": "ASR_PLATFORM_URL",
+    "sse": "ASR_PLATFORM_URL",
     "plat-simult": "ASR_PLATFORM_WS_URL",
     "plat-simult-ws": "ASR_PLATFORM_URL",
     "plat-minutes": "ASR_PLATFORM_URL",
     "plat-diar": "ASR_PLATFORM_URL",
     "plat-formula": "ASR_PLATFORM_URL",
-    "ext-pro": "EXT_PRO_URL",
-    "lite": "LITE_URL",
+    "ext-adv": "EXT_ADV_URL",
+    "light": "LIGHT_URL",
     "sensevoice": "SENSEVOICE_URL",
     "xf-spark-slm-iat": "XF_IAT_URL",
     "gemma-audio": "GEMMA_URL",
@@ -2121,7 +2121,7 @@ def _service_base(url: str) -> str:
     if "://" not in raw:
         raw = "http://" + raw
     raw = raw.replace("ws://", "http://", 1).replace("wss://", "https://", 1)
-    for marker in ("/api/v2/", "/ws/v2/"):
+    for marker in ("/api/", "/ws/"):
         if marker in raw:
             raw = raw.split(marker, 1)[0]
             break
@@ -2138,18 +2138,18 @@ _BUILTIN_SPECIAL_TESTS = {
 def _builtin_test_cfg(iid: str, m: dict, override: dict | None = None):
     url = (m.get("url") or "").strip()
     cfg = None
-    if iid in ("pro", "pro-domain", "normal", "turbo"):
+    if iid in ("adv", "adv-domain", "std", "compat"):
         ep = iid
-        base = url.split("/api/v2/asr/", 1)[0] if "/api/v2/asr/" in url else url.rsplit("/", 1)[0]
+        base = url.split("/api/asr/", 1)[0] if "/api/asr/" in url else url.rsplit("/", 1)[0]
         cfg = {"id": iid, "name": m.get("name", iid), "base_url": _norm_base(base), "template": "plat-multipart", "path": ep, "scenarios": ["ASR"]}
-    elif iid == "deepthink":
-        base = url.split("/api/v2/asr/", 1)[0] if "/api/v2/asr/" in url else url.rsplit("/", 1)[0]
+    elif iid == "sse":
+        base = url.split("/api/asr/", 1)[0] if "/api/asr/" in url else url.rsplit("/", 1)[0]
         cfg = {"id": iid, "name": m.get("name", iid), "base_url": _norm_base(base), "template": "plat-sse", "path": "", "scenarios": ["ASR"]}
     elif iid == "sensevoice":
         base = url.split("/api/asr_transcribe", 1)[0] if "/api/asr_transcribe" in url else url
         cfg = {"id": iid, "name": m.get("name", iid), "base_url": _norm_base(base), "template": "sensevoice", "path": "", "scenarios": ["ASR"]}
-    elif iid in ("ext-pro", "lite", "lite-mlt"):
-        route = "/asr_mlt_nano" if iid == "lite-mlt" else "/asr_lite"
+    elif iid in ("ext-adv", "light", "light-mlt"):
+        route = "/asr_mlt_nano" if iid == "light-mlt" else "/asr_lite"
         base = url.split(route, 1)[0] if route in url else url
         cfg = {"id": iid, "name": m.get("name", iid), "base_url": _norm_base(base), "template": "asr_lite", "path": route, "scenarios": ["ASR"]}
     elif iid in ("gemma-audio",):
@@ -2209,11 +2209,11 @@ def _iface_env_overrides():
         if key and c.get("url"):
             if key == "ASR_PLATFORM_URL":
                 env[key] = _service_base(c["url"])
-            elif key == "ASR_PLATFORM_WS_URL" and "/ws/v2/audio/" in c["url"]:
-                env[key] = c["url"].split("/ws/v2/audio/", 1)[0]
+            elif key == "ASR_PLATFORM_WS_URL" and "/ws/audio/" in c["url"]:
+                env[key] = c["url"].split("/ws/audio/", 1)[0]
             elif key == "SENSEVOICE_URL" and "/api/asr_transcribe" in c["url"]:
                 env[key] = c["url"].split("/api/asr_transcribe", 1)[0]
-            elif key in ("EXT_PRO_URL", "LITE_URL") and "/asr_lite" in c["url"]:
+            elif key in ("EXT_ADV_URL", "LIGHT_URL") and "/asr_lite" in c["url"]:
                 env[key] = c["url"].split("/asr_lite", 1)[0]
             elif key == "GEMMA_URL" and "/v1/" in c["url"]:
                 env[key] = c["url"].split("/v1/", 1)[0]
@@ -2394,11 +2394,11 @@ def _openapi_field(doc: dict, name: str, location: str, schema: dict,
 
 def _operation_template(path: str) -> tuple[str, str]:
     clean = path.rstrip("/")
-    if "/api/v2/asr/" in clean:
+    if "/api/asr/" in clean:
         endpoint = clean.rsplit("/", 1)[-1]
-        if endpoint in ("pro", "normal", "turbo", "pro-domain"):
+        if endpoint in ("adv", "std", "compat", "adv-domain"):
             return "plat-multipart", endpoint
-        if endpoint == "asr_input_stream_sse":
+        if endpoint == "sse":
             return "plat-sse", ""
         return "custom-http-asr", clean
     if clean.endswith("/asr_lite"):
@@ -2674,10 +2674,10 @@ def sniff_iface(req: SniffReq):
                     hint += "——未见语音类 model，已按文本 LLM 选 Chat 模板（翻译/总结）；若确是语音转写请手改"
                     return {"template": "openai-chat", "path": prefix,
                             "models": rest[:30], "hint": hint}
-                try:  # 同一服务可能也挂 v2，提示可手动切
+                try:  # 同一服务可能也挂平台接口，提示可手动切
                     op = requests.get(base + "/openapi.json", headers=headers, timeout=4)
-                    if op.ok and "/api/v2/asr/" in " ".join(op.json().get("paths", {}).keys()):
-                        hint += " ｜ ⚠ 同时检测到 v2 接口：测 v2 请手动把模板改成 plat-multipart、path 填 pro/normal/turbo"
+                    if op.ok and "/api/asr/" in " ".join(op.json().get("paths", {}).keys()):
+                        hint += " ｜ ⚠ 同时检测到平台接口：请手动把模板改成 plat-multipart、path 填 adv/std/compat"
                 except Exception:
                     pass
                 return {"template": "openai-audio", "path": prefix,
@@ -2698,18 +2698,18 @@ def sniff_iface(req: SniffReq):
             if any(x["template"] == "plat-multipart" for x in operations):
                 selected = next((x for x in operations
                                  if x["template"] == "plat-multipart"
-                                 and x["template_path"] == "pro"), None)
+                                 and x["template_path"] == "adv"), None)
                 selected = selected or next(
                     (x for x in operations if x["template"] == "plat-multipart"), {}
                 )
                 return {"template": "plat-multipart",
-                        "path": selected.get("template_path") or "pro", "models": [],
-                        "hint": "平台 v2 风格（请选择本次实际调用的端点）",
+                        "path": selected.get("template_path") or "adv", "models": [],
+                        "hint": "平台风格（请选择本次实际调用的端点）",
                         "operations": operations, "request_schema": selected.get("request_schema", [])}
             if any(x["template"] == "plat-sse" for x in operations):
                 selected = next(x for x in operations if x["template"] == "plat-sse")
                 return {"template": "plat-sse", "path": "", "models": [],
-                        "hint": "平台 v2 风格 SSE",
+                        "hint": "平台风格 SSE",
                         "operations": operations, "request_schema": selected.get("request_schema", [])}
             if "asr_transcribe" in paths:
                 selected = next((x for x in operations if x["template"] == "sensevoice"), {})
@@ -2736,7 +2736,7 @@ class AddIfaceReq(BaseModel):
     scenarios: list[str] = ["ASR"]
     enabled: bool = True
     prompt_tpl: str = ""       # openai-chat 翻译提示词模板({src}/{tgt})：MT 专用模型按官方模板喂
-    dual_result: bool = False    # deepthink 类：结果里同时保留 raw + edited，排名默认走 edited
+    dual_result: bool = False    # sse 类：结果里同时保留 raw + edited，排名默认走 edited
     language_spec: dict | None = None  # 厂商预设的语言参数帮助元数据；不绑定实际实验值
     itn: bool = False           # asr_lite 评测口径默认关闭 ITN
     return_timestamps: bool = False
@@ -2791,7 +2791,7 @@ def _ws_parts(url: str) -> tuple[str, str, str]:
 def _builtin_smoke_adapter(cfg: dict, audio_out_dir: str | None = None):
     """专项内置接口不能套通用 HTTP 模板，按真实 adapter 构造轻量冒烟实例。"""
     from adapters import (
-        CascadeLiteGemmaAdapter,
+        CascadeLightGemmaAdapter,
         DoubaoSimultAdapter,
         QwenLiveTranslateAdapter,
         PlatformDiarAdapter,
@@ -2836,7 +2836,7 @@ def _builtin_smoke_adapter(cfg: dict, audio_out_dir: str | None = None):
             kwargs["audio_out_dir"] = audio_out_dir
         return klass(**kwargs)
     if template == "cascade-gemma":
-        return CascadeLiteGemmaAdapter()
+        return CascadeLightGemmaAdapter()
     raise RuntimeError(f"专项测试策略 {template} 未实现")
 
 
@@ -2923,8 +2923,8 @@ def _smoke_audio_payload(res) -> dict:
 def _iface_cfg_from_req(req: AddIfaceReq, iid: str):
     _base = req.base_url.rstrip("/").replace("http://", "").replace("https://", "")
     _p = (req.path or "").strip()
-    if req.template == "plat-multipart":  # path=pro/normal/turbo 变体
-        disp_url = f"{_base}/api/v2/asr/{_p or 'pro'}"
+    if req.template == "plat-multipart":  # path=adv/std/compat 变体
+        disp_url = f"{_base}/api/asr/{_p or 'adv'}"
     elif req.template in ("openai-audio", "openai-chat", "openai-chat-audio"):  # path=前缀(默认 /v1)
         disp_url = _base + (_p if _p.startswith("/") else "/" + _p if _p else "/v1")
     elif req.template == "custom-http-asr":
@@ -4073,7 +4073,7 @@ def _review_complete(record: dict, result_file: str, score_issue_ids=None):
 def review_results():
     """按数据集→manifest 批次→模型返回当前可审核结果。
 
-    默认隐藏 smoke、退役模型、缺 dataset/model/v2 指纹的旧结果；
+    默认隐藏 smoke、退役模型、缺 dataset/model/manifest 指纹的旧结果；
     同一 manifest + model 只留最新一份，避免文件名平铺刷屏。
     """
     active_models = {m.get("id") for m in MODELS}
@@ -4088,7 +4088,7 @@ def review_results():
                 or not model or not dataset or model not in active_models
                 or model in RETIRED_MODELS):
             continue
-        if not sha:  # 旧结果只读计算当前 manifest v2，不回写历史 result。
+        if not sha:  # 旧结果只读计算当前 manifest 指纹，不回写历史 result。
             manifest_key = item["manifest"]
             if manifest_key not in sha_cache:
                 try:
@@ -4116,7 +4116,7 @@ def review_results():
             "manifest": row["manifest"], "n_total": row["n_total"], "models": [],
         })
         batch["models"].append(row)
-    priority = {name: idx for idx, name in enumerate(("pro", "deepthink", "normal", "lite"))}
+    priority = {name: idx for idx, name in enumerate(("adv", "sse", "std", "light"))}
     batches = list(groups.values())
     for batch in batches:
         batch["models"].sort(key=lambda r: (priority.get(r["model"], 99), r["model"]))

@@ -289,7 +289,7 @@ def run(manifest, model, language="auto", workers=1, retries=2, out=None,
                  f"{language_tag(language)}{f'__cfg-{_cfg}' if _cfg else ''}")
         akw["audio_out_dir"] = os.path.join(_root, "audio_out", _base)
     ctor_kwargs = dict(akw)
-    if domain:  # 领域提示词仅由独立 pro-domain adapter 接受；其他端点会明确拒绝
+    if domain:  # 领域提示词仅由独立 adv-domain adapter 接受；其他端点会明确拒绝
         ctor_kwargs["domain"] = domain
     if request_params:
         ctor_kwargs["request_params"] = request_params
@@ -536,7 +536,7 @@ def main():
     ap.add_argument("--save-audio", action="store_true",
                     help="同传：存译后语音到 audio_out/（仅 simult 系 adapter）")
     ap.add_argument("--domain", default="",
-                    help="领域提示词(legal/medical/finance/government_emergency)→ 强制走 pro-domain，文件名带 __dom-X")
+                    help="领域提示词(legal/medical/finance/government_emergency)→ 强制走 adv-domain，文件名带 __dom-X")
     ap.add_argument("--request-params-json", default="{}",
                     help="已由接口 request_schema 校验的运行时请求参数 JSON")
     ap.add_argument("--config-hash", default="",

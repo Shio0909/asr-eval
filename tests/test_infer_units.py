@@ -46,10 +46,10 @@ def test_hotwords_empty_keywords():
 
 def test_infer_path_isolates_scenario_b():
     # 场景 b(带热词)与场景 a 的 hyp 必须分文件，否则续跑互相污染
-    a = infer_file_path("ext-pro", "manifests/seaco_lite.jsonl", hotwords=False)
-    b = infer_file_path("ext-pro", "manifests/seaco_lite.jsonl", hotwords=True)
-    assert a == "infer/ext-pro__seaco_lite.jsonl"
-    assert b == "infer/ext-pro__seaco_lite__hw.jsonl"
+    a = infer_file_path("ext-adv", "manifests/seaco_lite.jsonl", hotwords=False)
+    b = infer_file_path("ext-adv", "manifests/seaco_lite.jsonl", hotwords=True)
+    assert a == "infer/ext-adv__seaco_lite.jsonl"
+    assert b == "infer/ext-adv__seaco_lite__hw.jsonl"
 
 
 def test_infer_path_isolates_language_experiment_variants():
@@ -277,7 +277,7 @@ def test_parallel_run_resumes_only_missing_successful_ids(tmp_path, monkeypatch)
 
 def test_builtin_adapter_receives_runtime_request_contract():
     adapter, _ = infer._make_adapter(
-        "normal", {"request_params": {"enable_word_timestamps": True}},
+        "std", {"request_params": {"enable_word_timestamps": True}},
     )
 
     assert adapter.request_params == {"enable_word_timestamps": True}

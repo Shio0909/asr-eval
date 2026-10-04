@@ -2,7 +2,7 @@
 
 为什么单独一个入口(不走 infer.py):infer 把一条音频当一个 item、断了只返回错误丢空;
 长音频(数小时)单会话端点大多撑不住,实测单会话上限(1x 裸跑 20260417 会议 2.97h):
-  豆包 142min/80% · 讯飞 46min/26% · v2 ~4min · qwen 0.1s(秒拒)。
+  豆包 142min/80% · 讯飞 46min/26% · 平台 ~4min · qwen 0.1s(秒拒)。
 本脚本:整段 1x 喂 + **断点捕获**(断了保留已收译文和喂到的秒数)+ **增量落盘**(进程被杀也不丢)。
 ⚠️ 掉线后"从断点续喂"需 adapter 支持 offset(跳过已喂音频)——当前 adapter 尚不支持,故为单会话整段跑;
    offset-resume 是后续增强。
@@ -11,7 +11,7 @@
   python eval/longrun.py --model doubao-simult --audio 会议.mp3 --target-lang 英文 --out result/<name>.json
 产物:
   <out>               汇总(ok/error/喂到秒数/coverage/译文全文/段数)
-  <out>.stream.jsonl  每段译文即时追加(audio_t, text)——durable,进程被杀也留得住(仅 v2 adapter 自带)
+  <out>.stream.jsonl  每段译文即时追加(audio_t, text)——durable,进程被杀也留得住(仅平台 adapter 自带)
 """
 import argparse
 import json

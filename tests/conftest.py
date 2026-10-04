@@ -8,8 +8,8 @@ import os
 for _k, _v in {
     "ASR_PLATFORM_URL": "http://platform.test:8000",
     "ASR_PLATFORM_WS_URL": "ws://platform.test:8000",
-    "LITE_URL": "http://lite.test:8001",
-    "EXT_PRO_URL": "http://ext.test:8002",
+    "LIGHT_URL": "http://lite.test:8001",
+    "EXT_ADV_URL": "http://ext.test:8002",
     "GEMMA_URL": "http://gemma.test:8003",
     "SENSEVOICE_URL": "http://sensevoice.test:8004",
     "QWEN3_ASR_URL": "http://qwen3.test:8005",

@@ -381,7 +381,7 @@
         <div id="lite-opts" style="transition:opacity .3s"><div class="lbl">条数</div><input id="in-limit" type="number" min="5" style="width:5.5rem" /></div>
         <div id="seed-opt" style="transition:opacity .3s"><div class="lbl" id="seed-lbl">种子</div><input id="in-seed" type="number" value="42" style="width:4.5rem" /></div>
         <div id="hw-opt" style="display:none"><div class="lbl">热词 · 场景 B</div><label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;padding:.55rem 0;cursor:pointer;color:var(--dim)"><input id="in-hw" type="checkbox" />传 keywords</label></div>
-        <div id="dom-opt" style="display:none"><div class="lbl">领域提示词</div><label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;padding:.55rem 0;cursor:pointer;color:var(--dim)"><input id="in-dom" type="checkbox" />走 pro-domain</label></div>
+        <div id="dom-opt" style="display:none"><div class="lbl">领域提示词</div><label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;padding:.55rem 0;cursor:pointer;color:var(--dim)"><input id="in-dom" type="checkbox" />走 adv-domain</label></div>
         <div id="emb-opt" style="display:none"><div class="lbl">语义相似度 · Emb</div><label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;padding:.55rem 0;cursor:pointer;color:var(--dim)" title="调外部 embedding 算 ref/hyp 语义余弦，专治改写型模型(字面 CER 高但语义其实对)；端点挂/限流自动降级，不影响 CER 等主指标"><input id="in-emb" type="checkbox" />算 emb_sim</label></div>
        <div id="comet-opt" style="display:none"><div class="lbl">神经质量 · XCOMET-XL</div><label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;padding:.55rem 0;cursor:pointer;color:var(--dim)" title="优先调用 GPU XCOMET-XL，输出语义质量和错误片段；GPU 服务不可用时降级到本地 COMET，不影响 chrF/BLEU 主指标"><input id="in-comet" type="checkbox" />算 XCOMET-XL</label></div>
        <div id="speech-opt" style="display:none"><div class="lbl">同传评测口径</div><label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;padding:.55rem 0;cursor:pointer;color:var(--dim)" title="默认关闭 TTS，测文本同传质量、LongYAAL 与稳定性；勾选后开启 TTS，并额外计算回转 CER/WER、UTMOS 和声线相似度"><input id="in-speech" type="checkbox" />语音同传 · 开启 TTS</label></div>
@@ -448,7 +448,7 @@
     </div>
   </section>
 
-  <!-- v2 接口覆盖进度看板已撤(页面意义不大)：数据仍在 server.py PLAT_COVERAGE
+  <!-- 接口覆盖进度看板已撤(页面意义不大)：数据仍在 server.py PLAT_COVERAGE
        (下拉框"待接接口"用)，人工核对清单导出在 docs/plat-coverage-checklist.md(gitignore) -->
 
   <!-- 测评集（资产清单，放底部） -->
@@ -582,7 +582,7 @@ function renderSelects(){
   const modelIds=DATA.scenario_models[SCENARIO]||[];
   CUR_MODELS=DATA.models.filter(m=>modelIds.includes(m.id));
   CUR_DSS=DATA.datasets.filter(d=>d.runnable && d.available && matchCat(d,SCENARIO));
-  // 分组按「角色」而非端点：被测主体(v2 远程/v3 本机门面) / 自定义 / 上游(非竞品) / 外部基线
+  // 分组按「角色」而非端点：被测主体(远程平台/本机门面) / 自定义 / 上游(非竞品) / 外部基线
   MGROUPS=[
     ['预置接口', CUR_MODELS.filter(m=>m.group=='iface'||m.group=='upstream'||m.group=='baseline')],
     ['外部厂商 / 自定义', CUR_MODELS.filter(m=>m.group=='custom')],
@@ -988,7 +988,7 @@ function updateControls(){
   const anyDom=selDs.some(d=>d.domain);
   $('#hw-opt').style.display='none'; $('#in-hw').checked=false;  // 热词改为每个「接口 × 数据集」单独配置
   $('#dom-opt').style.display=anyDom?'':'none';
-  $('#dom-opt').title=anyDom?'pro-domain 接口 + domain 提示词，对照不勾的裸 pro（仅对登记了 domain 的集生效）':'';
+  $('#dom-opt').title=anyDom?'adv-domain 接口 + domain 提示词，对照不勾的裸 adv（仅对登记了 domain 的集生效）':'';
   if(!anyDom)$('#in-dom').checked=false;
   // 语义相似度开关：score-only 增强，整个 ASR / 翻译 场景可用
   $('#emb-opt').style.display=(SCENARIO=='ASR'||SCENARIO=='翻译')?'':'none';
@@ -1538,7 +1538,7 @@ function badges(r,compact){
   const m=modelMeta(r);if(!m)return'';
   return (m.local?' <span class="badge badge-local" title="本机 dev 进程，无网络往返，延迟/RTF 勿与远程端点比">本机</span>':'')
     +(m.group=='upstream'?' <span class="badge badge-up" title="上游模型，不是竞品对照">上游</span>':'')
-    +(!compact&&m.lineage?` <span class="badge badge-lin" title="与 ${escAttr(m.lineage)} 是同一条 v2 管线（恒等回归对照）">≡${escHtml(m.lineage)}</span>`:'');
+    +(!compact&&m.lineage?` <span class="badge badge-lin" title="与 ${escAttr(m.lineage)} 是同一条平台管线（恒等回归对照）">≡${escHtml(m.lineage)}</span>`:'');
 }
 function renderBoard(){
   let rows=results();
@@ -1768,7 +1768,7 @@ function renderDetailModal(){
   const rankedByEdited=su.ranked_by==='edited' && su.err_rate_raw!=null;
   $('#modal-title').innerHTML=escHtml(file.replace('.json',''))+(m?`<div class="mono" style="font-size:.66rem;font-weight:400;margin-top:.4rem;color:var(--faint)">infer ${escHtml((m.infer_started||'—').replace('T',' '))} · 打分 ${escHtml((m.scored_at||'—').slice(0,19).replace('T',' '))} · 端点 ${escHtml(m.endpoint||'—')}${m.language?` · 语言提示 ${escHtml(m.language)}`:''}${m.config_hash?` · 配置 ${escHtml(m.config_hash)}`:''}${m.note?` · 备注 ${escHtml(m.note)}`:''} · 清单指纹 ${escHtml(m.manifest_sha||'—')}${m.manifest_sha_v2?` · v2 ${escHtml(m.manifest_sha_v2)}`:''}</div>${Object.keys(m.request_params||{}).length?`<div class="mono" style="font-size:.64rem;font-weight:400;margin-top:.32rem;color:var(--signal-deep)">请求参数 ${escHtml(JSON.stringify(m.request_params))}</div>`:''}`:'');
   $('#modal-title').innerHTML+=`<div class="mono" style="display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.74rem;margin-top:.55rem;color:var(--dim)">`
-    +(rankedByEdited?`<span title="deepthink 参与榜单排名默认使用修饰稿口径">${escHtml(su.metric||'CER')}(修饰) <b style="color:var(--signal)">${pct(su.err_rate)}</b></span>`:'')
+    +(rankedByEdited?`<span title="sse 参与榜单排名默认使用修饰稿口径">${escHtml(su.metric||'CER')}(修饰) <b style="color:var(--signal)">${pct(su.err_rate)}</b></span>`:'')
     +(rankedByEdited?`<span>${escHtml(su.metric||'CER')}(原始) <b style="color:var(--signal-deep)">${pct(su.err_rate_raw)}</b></span>`:'')
     +(su.chrF!=null?`<span>chrF <b style="color:var(--signal)">${su.chrF}</b></span>`:'')
     +(su.chrF_document!=null?`<span title="旧整场文本直接拼接口径；榜单已改用 OmniSTEval SoftSegmenter 重分段 chrF">整场直拼 chrF <b style="color:var(--faint)">${su.chrF_document}</b></span>`:'')
@@ -1873,11 +1873,11 @@ async function exportMD(mani){
 const IFACE_TPL=[   // 文案以用途开头：用户想的是"我接的是什么模型"，不是协议名
  ['openai-audio','语音识别 · OpenAI 兼容 (/v1/audio/transcriptions)——Qwen3-ASR/硅基流动 等'],
  ['openai-chat-audio','语音识别 · OpenAI Chat 音频 (/v1/chat/completions + input_audio)——MiMo 等'],
- ['plat-multipart','语音识别 · 平台 multipart（path 填 pro/normal/turbo）'],
+ ['plat-multipart','语音识别 · 平台 multipart（path 填 adv/std/compat）'],
  ['asr_lite','语音识别 · /asr_lite multipart（Qwen3-ASR/FunASR 系）'],
  ['sensevoice','语音识别 · SenseVoice 风格（/api/asr_transcribe）'],
- ['plat-sse','语音识别 · v2 SSE 流式（asr_input_stream_sse）'],
- ['plat-sse-dual','语音识别 · DeepThink 双结果（SSE + 修饰稿主排名）'],
+ ['plat-sse','语音识别 · SSE 流式（sse）'],
+ ['plat-sse-dual','语音识别 · SSE 双结果（SSE + 修饰稿主排名）'],
  ['openai-chat','文本翻译/总结 · OpenAI Chat (/v1/chat/completions)——翻译、总结类文本模型选这个'],
  ['custom-http-asr','高级自定义 · HTTP ASR（请求体和返回字段可配置）'],
 ];
@@ -1979,9 +1979,9 @@ const TPL_INFO={
   'openai-audio':{model:1,mLbl:'model',mPh:'(嗅探后选/手填)',path:'/v1',pLbl:'路径前缀',pPh:'/v1',pLock:0,desc:'OpenAI 兼容音频转写 /v1/audio/transcriptions · 填 model + 前缀'},
   'openai-chat-audio':{model:1,mLbl:'model',mPh:'如 mimo-v2.5-asr',path:'/v1',pLbl:'路径前缀',pPh:'/v1',pLock:0,desc:'Chat 音频转写 /v1/chat/completions · 音频放入 messages[].content[].input_audio'},
   'openai-chat':{model:1,mLbl:'model',mPh:'如 gpt-4o-mini',path:'/v1',pLbl:'路径前缀',pPh:'/v1',pLock:0,desc:'OpenAI chat /v1/chat/completions · 文本翻译/总结 · 填 model + 前缀'},
-  'plat-multipart':{model:0,mLbl:'model(不用)',mPh:'此模板无需 model',path:'pro',pLbl:'v2 端点',pPh:'pro/normal/turbo',pLock:0,desc:'平台 multipart · 不用 model · path 填端点名(pro/normal/turbo)'},
-  'plat-sse':{model:0,mLbl:'model(不用)',mPh:'无需 model',path:'',pLbl:'path(固定)',pPh:'固定 asr_input_stream_sse',pLock:1,desc:'v2 SSE 流式 · 路径固定 · 只填 Base URL'},
-  'plat-sse-dual':{model:0,mLbl:'model(不用)',mPh:'无需 model',path:'',pLbl:'path(固定)',pPh:'固定 asr_input_stream_sse',pLock:1,desc:'DeepThink 类双结果：原始 ASR + 修饰稿同时保留，榜单默认按修饰稿排序'},
+  'plat-multipart':{model:0,mLbl:'model(不用)',mPh:'此模板无需 model',path:'adv',pLbl:'平台端点',pPh:'adv/std/compat',pLock:0,desc:'平台 multipart · 不用 model · path 填端点名(adv/std/compat)'},
+  'plat-sse':{model:0,mLbl:'model(不用)',mPh:'无需 model',path:'',pLbl:'path(固定)',pPh:'固定 sse',pLock:1,desc:'平台 SSE 流式 · 路径固定 · 只填 Base URL'},
+  'plat-sse-dual':{model:0,mLbl:'model(不用)',mPh:'无需 model',path:'',pLbl:'path(固定)',pPh:'固定 sse',pLock:1,desc:'SSE 类双结果：原始 ASR + 修饰稿同时保留，榜单默认按修饰稿排序'},
   'asr_lite':{model:0,mLbl:'model(不用)',mPh:'无需 model',path:'',pLbl:'path(固定)',pPh:'固定 /asr_lite',pLock:1,desc:'/asr_lite multipart · 音频字段 audio · 支持 language / itn / return_timestamps'},
   'sensevoice':{model:0,mLbl:'model(不用)',mPh:'无需 model',path:'',pLbl:'path(固定)',pPh:'固定 /api/asr_transcribe',pLock:1,desc:'SenseVoice 风格 · 路径固定 · 只填 Base URL'},
   'custom-http-asr':{model:0,mLbl:'model(可写进 body)',mPh:'无需 model',path:'',pLbl:'完整 URL',pPh:'URL 已在上方填写',pLock:1,desc:'自定义 HTTP ASR · 可配置请求体、headers 和返回 text_path'},

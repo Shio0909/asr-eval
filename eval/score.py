@@ -420,7 +420,7 @@ def run(manifest, infer, out=None, concurrent=False, embedding=False, comet=Fals
     sub_counts, del_counts, ins_counts = [], [], []
     sent_total = sent_err = 0
     hyp_lens, length_ratios = [], []
-    raw_ref_lens, raw_edit_counts = [], []  # deepthink 修饰口径为主时，保留原始 ASR 汇总
+    raw_ref_lens, raw_edit_counts = [], []  # sse 修饰口径为主时，保留原始 ASR 汇总
     ttfbs = []  # 流式接口首包延迟(extra.ttfb_s)，串行口径
     stable_ttfbs = []  # 首个明确 commit 的译文；临时首包快但频繁回改时能揭示真实等待
     als, laals = [], []  # 同传延迟 AL/LAAL(秒，extra.al_s/laal_s)，需 1x 实时节奏采集，串行口径
@@ -531,7 +531,7 @@ def run(manifest, infer, out=None, concurrent=False, embedding=False, comet=Fals
         extra = d.get("extra") or {}
         has_edited_output = "edited_text" in extra
         edited_text = extra.get("edited_text", "") or ""
-        # deepthink 排名默认走 LLM 修饰稿；没有修饰稿的模型保持原始 hyp 口径。
+        # sse 排名默认走 LLM 修饰稿；没有修饰稿的模型保持原始 hyp 口径。
         # --use-edited 兼容旧脚本：现在与默认行为等价，不再单独产出 __edited 文件。
         hyp = edited_text or d["hyp"]
         output_variant_counts["edited" if edited_text else "raw"] += 1
@@ -744,7 +744,7 @@ def run(manifest, infer, out=None, concurrent=False, embedding=False, comet=Fals
             hyp_lens.append(hyp_len)
             if c.ref_len > 0:
                 length_ratios.append(hyp_len / c.ref_len)
-            # deepthink 有修饰稿时：主口径=edited，额外保留原始 ASR raw.* 口径。
+            # sse 有修饰稿时：主口径=edited，额外保留原始 ASR raw.* 口径。
             raw_c = None
             if has_edited_output:
                 raw_c = word_wer(ref_n, hyp_raw_n) if is_word else char_cer(ref_n, hyp_raw_n)
@@ -1141,7 +1141,7 @@ def main():
                     help="同传：ASR 回转译后语音算 ASR-BLEU 语音保真(需 infer --save-audio)")
     ap.add_argument("--use-edited", action="store_true",
                     help="用 extra.edited_text(Pass 2 LLM 修饰稿)替代 hyp(Pass 1 原始 ASR)打分，"
-                         "供 deepthink 两路对比")
+                         "供 sse 两路对比")
     args = ap.parse_args()
     run(args.manifest, args.infer, args.out, args.concurrent, args.embedding, args.comet,
         args.asr_bleu, args.use_edited)

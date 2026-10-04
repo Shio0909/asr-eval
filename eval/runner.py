@@ -7,7 +7,7 @@
   uv run --with jiwer --with opencc --with soundfile --with numpy --with requests \
       --with websocket-client \
       python eval/runner.py --manifest manifests/aishell_lite.jsonl \
-      --model ext-pro --language zh --out results/aishell_ext-pro.json
+      --model ext-adv --language zh --out results/aishell_ext-adv.json
 """
 
 import argparse
@@ -25,7 +25,7 @@ log = get_logger("runner")
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--manifest", required=True)
-    ap.add_argument("--model", default="ext-pro", choices=list(ADAPTERS))
+    ap.add_argument("--model", default="ext-adv", choices=list(ADAPTERS))
     ap.add_argument("--language", default="auto")
     ap.add_argument("--target-lang", default="",
                     help="覆盖 manifest 的 target_lang（翻译/同传实验）")

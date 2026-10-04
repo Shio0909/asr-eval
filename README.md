@@ -88,7 +88,7 @@ uv run python dashboard/server.py        # http://localhost:8088
 
 | 类别 | 名称 |
 |---|---|
-| 自托管平台（需自行配置 `ASR_PLATFORM_URL`） | `lite`、`normal`、`pro`、`deepthink`、`pro-domain`、`plat-simult`、`plat-simult-ws`、`plat-realtime`、`plat-minutes`、`plat-formula`、`plat-diar` |
+| 自托管平台（需自行配置 `ASR_PLATFORM_URL`） | `light`、`std`、`adv`、`sse`、`adv-domain`、`plat-simult`、`plat-simult-ws`、`plat-realtime`、`plat-minutes`、`plat-formula`、`plat-diar` |
 | 开源 / 厂商 ASR | `sensevoice`、`gemma-text`、`cascade-gemma`、`qwen-asr`、`qwen3-asr-ws`、`whisper-local`、`xf-spark-slm-iat` |
 | 同传 | `qwen-simult`、`doubao-simult`、`xf-simult` |
 | 通用模板 | 看板「添加接口」提供 OpenAI audio / chat、自定义 HTTP 等协议模板，以及 OpenAI、DashScope、MiMo 厂商预设 |

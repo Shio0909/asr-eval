@@ -179,29 +179,29 @@ def test_platform_asr_adapter_never_switches_normal_identity_for_hotwords(monkey
     monkeypatch.setattr(adapters, "http_post", fake_post)
 
     ad = adapters.PlatformASRAdapter(
-        base_url="http://example.test", endpoint="normal", api_key="secret-token"
+        base_url="http://example.test", endpoint="std", api_key="secret-token"
     )
     assert ad.transcribe("a.wav", language="Chinese,English").ok
-    assert seen[-1][0].endswith("/api/v2/asr/normal")
+    assert seen[-1][0].endswith("/api/asr/std")
     assert seen[-1][1]["language"] == "Chinese,English"
     assert seen[-1][2] == {"Authorization": "Bearer secret-token"}
 
     before = len(seen)
     rejected = ad.transcribe("a.wav", language="English", hotwords="Qwen")
     assert rejected.ok is False
-    assert "pro-domain" in rejected.error
+    assert "adv-domain" in rejected.error
     assert len(seen) == before
 
     translated = ad.transcribe("a.wav", target_lang="English")
     assert translated.ok is False
-    assert "normal 不支持语音翻译" in translated.error
+    assert "std 不支持语音翻译" in translated.error
     assert len(seen) == before
 
-    domain = adapters.PlatformProDomainAdapter(
+    domain = adapters.PlatformAdvDomainAdapter(
         base_url="http://example.test", domain="legal", api_key="secret-token"
     )
     assert domain.transcribe("a.wav", language="English", hotwords="Qwen").ok
-    assert seen[-1][0].endswith("/api/v2/asr/pro-domain")
+    assert seen[-1][0].endswith("/api/asr/adv-domain")
     assert seen[-1][1]["domain"] == "legal"
     assert seen[-1][1]["language"] == "English"
 
@@ -557,14 +557,14 @@ def test_plat_multipart_template_resolves_bearer_token_from_env(monkeypatch):
     ad = adapters.make_custom_adapter({
         "id": "x-normal-8000",
         "template": "plat-multipart",
-        "base_url": "http://h.example.test/api/v2/asr/normal",
-        "path": "normal",
+        "base_url": "http://h.example.test/api/asr/std",
+        "path": "std",
         "key_env": "ASR_PLATFORM_TOKEN",
     })
 
     assert isinstance(ad, adapters.PlatformASRAdapter)
     assert ad.base == "http://h.example.test"
-    assert ad.url == "http://h.example.test/api/v2/asr/normal"
+    assert ad.url == "http://h.example.test/api/asr/std"
     assert ad.api_key == "env-token"
 
 
@@ -586,7 +586,7 @@ def test_custom_plat_adapter_merges_registered_runtime_form_params(monkeypatch):
         "id": "x-pro",
         "template": "plat-multipart",
         "base_url": "http://asr.test",
-        "path": "pro",
+        "path": "adv",
         "api_key": "fixture",
         "request_schema": [
             {"name": "enable_word_timestamps", "in": "form", "type": "boolean"},
@@ -668,7 +668,7 @@ def test_asr_lite_adapter_sends_task_language_itn_and_timestamps(monkeypatch):
     monkeypatch.setattr(adapters, "load_wav_bytes", lambda path: b"RIFFxxxx")
     monkeypatch.setattr(adapters, "http_post", fake_post)
 
-    ad = adapters.LiteASRAdapter(
+    ad = adapters.LightASRAdapter(
         "http://example.test", default_itn=True, return_timestamps=True,
     )
     res = ad.transcribe("a.wav", language="sichuan")
@@ -695,7 +695,7 @@ def test_builtin_lite_surface_does_not_send_unpublished_timestamp_field(monkeypa
 
     monkeypatch.setattr(adapters, "load_wav_bytes", lambda path: b"RIFFxxxx")
     monkeypatch.setattr(adapters, "http_post", fake_post)
-    ad = adapters.LiteASRAdapter("http://example.test", default_itn=False)
+    ad = adapters.LightASRAdapter("http://example.test", default_itn=False)
 
     assert ad.transcribe("a.wav", language="auto").ok
     assert seen["data"] == {"language": "auto", "itn": "false"}
@@ -716,7 +716,7 @@ def test_asr_mlt_adapter_uses_mlt_route(monkeypatch):
     monkeypatch.setattr(adapters, "load_wav_bytes", lambda path: b"RIFFxxxx")
     monkeypatch.setattr(adapters, "http_post", fake_post)
 
-    res = adapters.lite_mlt_nano().transcribe("a.wav", language="阿拉伯语")
+    res = adapters.light_mlt_nano().transcribe("a.wav", language="阿拉伯语")
 
     assert res.ok and res.text == "مرحبا"
     assert seen["url"] == "http://lite.test:8001/asr_mlt_nano"
@@ -1190,7 +1190,7 @@ def test_infor_preses_worker_cap_for_shared_endpoints():
     class _Uncaped:
         pass  # 无 _MAX_WORKERS
 
-    assert infer._aply_worker_cap("pro", _Uncaped(), 16) == 16, "无上限的端点不受影响"
+    assert infer._aply_worker_cap("adv", _Uncaped(), 16) == 16, "无上限的端点不受影响"
 
 
 def test_plat_realtime_gives_up_when_server_returns_no_text(monkeypatch):

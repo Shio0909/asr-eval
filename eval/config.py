@@ -16,8 +16,8 @@ def _env(key, default):
 ENDPOINTS = {
     "platform": _env("ASR_PLATFORM_URL", ""),        # 自托管 ASR 平台（HTTP，Bearer 鉴权）
     "openai_audio": _env("ASR_OPENAI_AUDIO_URL", ""),  # OpenAI 兼容 audio 接口
-    "ext_pro": _env("EXT_PRO_URL", ""),
-    "lite": _env("LITE_URL", ""),
+    "ext_adv": _env("EXT_ADV_URL", ""),
+    "light": _env("LIGHT_URL", ""),
     "gemma": _env("GEMMA_URL", ""),
     "sensevoice": _env("SENSEVOICE_URL", ""),
 }
