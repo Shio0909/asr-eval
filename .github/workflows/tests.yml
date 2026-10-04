@@ -1,0 +1,18 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Run test suite
+        run: >-
+          uv run --with pytest --with jiwer --with opencc --with sacrebleu
+          --with requests --with whisper-normalizer pytest tests/ -q

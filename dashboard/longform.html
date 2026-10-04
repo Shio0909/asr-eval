@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>长音频同传时间轴</title>
+  <style>
+    :root{--paper:#f3f1ea;--panel:#fbfaf6;--ink:#24231f;--dim:#6f6b61;--faint:#9b968b;
+      --line:#d9d5cb;--signal:#e85012;--green:#128769;--blue:#365fce;--shadow:0 12px 36px rgba(35,31,22,.10)}
+    *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}
+    button,a{font:inherit}.mono{font-family:"SFMono-Regular",Consolas,monospace}
+    header{height:58px;padding:0 max(18px,calc((100vw - 1400px)/2));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(243,241,234,.94);position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
+    .brand{font-size:13px;font-weight:750;letter-spacing:.16em}.back{color:var(--dim);text-decoration:none;border:1px solid var(--line);border-radius:5px;padding:7px 11px;background:var(--panel)}
+    main{width:min(1400px,calc(100% - 32px));margin:22px auto 60px}.loading{padding:80px 20px;text-align:center;color:var(--faint)}
+    .hero{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:20px 22px;box-shadow:var(--shadow)}
+    h1{font-size:20px;margin:0 0 8px;overflow-wrap:anywhere}.meta{display:flex;gap:8px 18px;flex-wrap:wrap;color:var(--dim);font-size:12px}
+    .badge{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 8px;background:#f6f4ee}.badge.warn{color:#9b5b00;border-color:#dfc58c;background:#fff8e9}.badge.ok{color:var(--green);border-color:#a7d8c9;background:#edf9f5}
+    .players{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.player{border-top:1px solid var(--line);padding-top:12px}.player:only-child{grid-column:1/-1}.player label{display:block;color:var(--faint);font-size:11px;letter-spacing:.08em;margin-bottom:7px}.player audio{width:100%;height:38px}
+    .guide{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 2px 10px;color:var(--dim);font-size:12px}.now{margin-left:auto;font-weight:700;color:var(--signal)}
+    .timeline{display:flex;flex-direction:column;gap:9px}.segment{display:grid;grid-template-columns:104px minmax(0,1.05fr) minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:7px;background:var(--panel);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+    .segment:hover{border-color:#b9b3a5}.segment.active{border-color:var(--signal);box-shadow:0 0 0 2px rgba(232,80,18,.12)}
+    .seek{border:0;border-right:1px solid var(--line);background:#efede6;color:var(--dim);cursor:pointer;padding:15px 10px;text-align:left}.seek:hover{color:var(--signal)}.seek b{display:block;color:var(--ink);font-size:13px;margin-bottom:5px}.seek span{font-size:10px}
+    .cell{padding:13px 15px;line-height:1.65;min-width:0;overflow-wrap:anywhere;border-right:1px solid var(--line);font-size:14px}.cell:last-child{border-right:0}.label{display:block;font-size:10px;letter-spacing:.11em;color:var(--faint);margin-bottom:5px}.source .label{color:var(--blue)}.reference .label{color:#9a7020}.hyp{background:#f1faf6}.hyp .label{color:var(--green)}.empty{color:#b4afa4;font-style:italic}
+    .model-section{margin:18px 0}.section-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 9px}.section-title h2{font-size:14px;letter-spacing:.08em;margin:0}.section-title span{font-size:11px;color:var(--faint)}
+    .model-list{display:flex;flex-direction:column;gap:8px}.model-card{display:grid;grid-template-columns:120px minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:7px;background:var(--panel);overflow:hidden}.model-card .seek{min-height:100%}.model-source,.model-output{padding:13px 15px;line-height:1.6;font-size:14px;overflow-wrap:anywhere}.model-source{border-right:1px solid var(--line);background:#f2f5fc}.model-output{background:#f1faf6}.timings{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.timings code{font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 6px;background:#faf8f2}
+    .error{padding:30px;border:1px solid #e2aaa0;background:#fff4f1;border-radius:8px;color:#9e2d1c}
+    @media(max-width:1000px){.segment{grid-template-columns:88px 1fr}.seek{grid-row:1/4}.cell{grid-column:2;border-right:0;border-bottom:1px solid var(--line)}.cell:last-child{border-bottom:0}.players{grid-template-columns:1fr}.model-card{grid-template-columns:88px 1fr}.model-card .seek{grid-row:1/3}.model-source,.model-output{grid-column:2}.model-source{border-right:0;border-bottom:1px solid var(--line)}}
+    @media(max-width:600px){main{width:min(100% - 20px,1400px);margin-top:10px}.hero{padding:16px}.segment{grid-template-columns:76px 1fr}.cell{padding:11px;font-size:13px}.now{width:100%;margin-left:0}}
+  </style>
+</head>
+<body>
+<header><div class="brand">LONGFORM · 同传时间轴</div><a class="back" href="/">← 返回看板</a></header>
+<main><div id="app" class="loading">正在组合完整 manifest 与 infer 原始输出…</div></main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clock=value=>{let s=Math.max(0,Math.round(Number(value)||0));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`};
+const q=new URLSearchParams(location.search),file=q.get('file')||'',sampleId=q.get('id')||'';
+let data=null,active=-1;
+
+function seekTo(index){
+  const segment=data.segments[index],audio=$('#source-audio');
+  if(!segment||!audio)return;
+  audio.currentTime=Math.max(0,segment.start_s+.01);
+  audio.play().catch(()=>{});
+}
+function seekSeconds(seconds){
+  const audio=$('#source-audio');if(!audio)return;
+  audio.currentTime=Math.max(0,Number(seconds)||0);audio.play().catch(()=>{});
+}
+function timingChips(timing){
+  const names={queue_ms:'排队',asr_ms:'ASR',text_translate_ms:'翻译',text_ttft_ms:'译文首字',text_decode_ms:'译文解码',tts_ms:'TTS',e2e_ms:'端到端'};
+  return Object.entries(names).filter(([key])=>timing&&timing[key]!=null).map(([key,label])=>`<code>${label} ${esc(timing[key])}ms</code>`).join('');
+}
+function updateActive(){
+  const audio=$('#source-audio');if(!audio||!data)return;
+  const t=audio.currentTime||0;
+  $('#now').textContent=`${clock(t)} / ${clock(data.duration_s)}`;
+  const index=data.segments.findIndex((s,i)=>t>=s.start_s&&(t<s.end_s||i===data.segments.length-1));
+  if(index===active)return;
+  if(active>=0)document.querySelector(`[data-index="${active}"]`)?.classList.remove('active');
+  active=index;
+  if(active>=0)document.querySelector(`[data-index="${active}"]`)?.classList.add('active');
+}
+function render(d){
+  data=d;document.title=`${d.id} · 长音频时间轴`;
+  const sourceTiming=d.source_timing==='exact'
+    ?'<span class="badge ok">原文：数据集时间戳</span>'
+    :'<span class="badge warn">原文：按文本长度估算时间</span>';
+  const translationTiming=d.translation_timing==='event'
+    ?'<span class="badge ok">模型译文：真实分段完成时间</span>'
+    :'<span class="badge warn">模型译文：历史结果估算时间</span>';
+  const refType=d.reference_type==='human_simultaneous_interpretation'?'人工同传参考':'书面翻译参考';
+  const modelRows=(d.model_segments||[]).map((s,i)=>{
+    const start=s.start_s==null?s.end_s:s.start_s, mode=s.pipeline_mode==='multi_stage'?'多阶段 ASR→MT':'单阶段直译';
+    const sourceLabel='源端 ASR · SOURCE ASR';
+    const segmentNo=Number.isFinite(Number(s.segment_id))?Number(s.segment_id)+1:i+1;
+    return `<article class="model-card">
+      <button class="seek mono" onclick="seekSeconds(${Number(start)||0})" title="跳到 ${clock(start)}"><b>${clock(start)}</b><span>→ ${clock(s.end_s)}</span><span>${s.emitted_at_s!=null?`<br>返回于 ${clock(s.emitted_at_s)}`:''}</span></button>
+      <div class="model-source"><span class="label">${sourceLabel}</span>${s.asr_text?esc(s.asr_text):'<span class="empty">该段未返回 original_text</span>'}</div>
+      <div class="model-output"><span class="label">第 ${segmentNo} 段 · ${mode}</span>${esc(s.text)}<div class="timings">${timingChips(s.timing)}</div></div>
+    </article>`;
+  }).join('');
+  const rows=d.segments.map((s,i)=>`<article class="segment" data-index="${i}">
+    <button class="seek mono" onclick="seekTo(${i})" title="跳到 ${clock(s.start_s)}"><b>${clock(s.start_s)}</b><span>→ ${clock(s.end_s)}</span></button>
+    <div class="cell source"><span class="label">原文 · SOURCE</span>${s.source_text?esc(s.source_text):'<span class="empty">该时段无原文</span>'}</div>
+    <div class="cell reference"><span class="label">参考 · REFERENCE</span>${s.ref_text?esc(s.ref_text):'<span class="empty">该时段无参考</span>'}</div>
+    <div class="cell hyp"><span class="label">模型译文 · OUTPUT</span>${s.hyp_text?esc(s.hyp_text):'<span class="empty">该时段没有模型定稿</span>'}</div>
+  </article>`).join('');
+  $('#app').className='';
+  $('#app').innerHTML=`<section class="hero">
+    <h1>${esc(d.id)}</h1>
+    <div class="meta mono"><span>接口 ${esc(d.model||'—')}</span><span>语向 ${esc(d.lang||'—')}</span><span>时长 ${clock(d.duration_s)}</span><span>原文段 ${d.manifest_segment_count||d.segments.length}</span><span>模型段 ${d.model_segment_count}</span>${d.metrics?.al_s!=null?`<span>AL ${d.metrics.al_s}s</span>`:''}</div>
+    <div class="players"><div class="player"><label>原始长音频</label><audio id="source-audio" controls preload="metadata" src="/api/audio?path=${encodeURIComponent(d.audio_path)}"></audio></div>
+      ${d.tts_audio?`<div class="player"><label>完整译后音频 · TTS</label><audio controls preload="metadata" src="/api/audio?path=${encodeURIComponent(d.tts_audio)}"></audio></div>`:''}</div>
+  </section>
+  ${modelRows?`<section class="model-section"><div class="section-title"><h2>模型真实分段</h2><span>源音频起止、返回位置与阶段耗时来自 si_segment_done</span></div><div class="model-list">${modelRows}</div></section>`:''}
+  <div class="guide">${sourceTiming}${translationTiming}<span class="badge">${esc(refType)}</span><span>点击左侧时间可跳播；红框跟随当前播放位置。</span><span id="now" class="now mono">00:00 / ${clock(d.duration_s)}</span></div>
+  <section class="timeline">${rows}</section>`;
+  $('#source-audio').addEventListener('timeupdate',updateActive);updateActive();
+}
+async function load(){
+  if(!file||!sampleId){$('#app').className='error';$('#app').textContent='缺少 file 或 id 参数';return;}
+  try{
+    const r=await fetch(`/api/longform_sample?file=${encodeURIComponent(file)}&id=${encodeURIComponent(sampleId)}`),d=await r.json();
+    if(!r.ok)throw new Error(d.error||'加载失败');render(d);
+  }catch(e){$('#app').className='error';$('#app').textContent='无法打开长音频时间轴：'+e.message;}
+}
+load();
+</script>
+</body>
+</html>

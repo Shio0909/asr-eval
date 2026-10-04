@@ -1,0 +1,47 @@
+# 数据本体不入仓：datasets/download.sh 是数据的"源码"（重建入口）
+datasets/*
+!datasets/download.sh
+!datasets/README.md
+!datasets/exclusions/
+!datasets/golden/
+downloads/
+
+# 评测产物与运行态不入仓
+manifests/
+infer/
+results/
+result/
+audio_out/
+logs/
+jobs.json
+reviews/drafts/
+reviews/events/
+hfcache/
+
+# 密钥与本地配置
+eval/secrets_local.py
+.env
+.env.*
+!.env.example
+# 自定义接口注册表，可能含第三方 api_key
+dashboard/interfaces.json
+
+# 大件音频/压缩包
+*.mp3
+*.m4a
+*.pcm
+*.wav
+*.7z
+*.zip
+*.tar.gz
+*.log
+
+# Python / 工具
+__pycache__/
+*.pyc
+.venv/
+.venv-*/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+nohup.out

@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>讯飞同声传译</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #13211b;
+      --muted: #6b7771;
+      --line: #dfe8e2;
+      --paper: #fbfdfb;
+      --green: #157347;
+      --green-dark: #0f5535;
+      --green-soft: #e7f5ec;
+      --red: #c7423a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 0%, #e7f6ec 0, transparent 34rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main { width: min(860px, calc(100% - 32px)); margin: 0 auto; padding: 52px 0 64px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { font-size: 14px; font-weight: 760; letter-spacing: .08em; }
+    .direction {
+      border: 1px solid #bdd9c7;
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      padding: 8px 12px;
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .intro { margin: 80px 0 36px; max-width: 680px; }
+    h1 { margin: 0; font-size: clamp(40px, 7vw, 72px); line-height: 1.04; letter-spacing: -.055em; }
+    .intro p { margin: 22px 0 0; color: var(--muted); font-size: 17px; line-height: 1.7; }
+    .controls { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    button {
+      min-width: 152px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--green);
+      color: white;
+      padding: 15px 24px;
+      font: inherit;
+      font-weight: 760;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(21,115,71,.2);
+      transition: transform .15s ease, background .15s ease;
+    }
+    button:hover { transform: translateY(-1px); background: var(--green-dark); }
+    button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+    button.live { background: var(--red); box-shadow: 0 10px 24px rgba(199,66,58,.18); }
+    .status { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: 14px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #aab4af; }
+    .status.live .dot { background: var(--red); box-shadow: 0 0 0 6px rgba(199,66,58,.12); animation: pulse 1.5s infinite; }
+    .sound {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-left: auto;
+      color: var(--green-dark);
+      font-size: 14px;
+      font-weight: 680;
+      cursor: pointer;
+      user-select: none;
+    }
+    .sound input { width: 17px; height: 17px; accent-color: var(--green); }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(199,66,58,0); } }
+    .transcript {
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 18px 50px rgba(38,67,52,.07);
+      overflow: hidden;
+    }
+    .empty { min-height: 278px; display: grid; place-items: center; color: #91a099; text-align: center; padding: 32px; }
+    .segment { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding: 26px 28px; border-bottom: 1px solid var(--line); }
+    .segment:last-child { border-bottom: 0; }
+    .segment.partial { background: var(--green-soft); }
+    .label { margin-bottom: 9px; color: var(--muted); font-size: 11px; font-weight: 760; letter-spacing: .1em; text-transform: uppercase; }
+    .text { font-size: 17px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .translation .text { color: var(--green-dark); font-size: 19px; font-weight: 640; }
+    .note { margin: 14px 4px 0; color: #839089; font-size: 12px; line-height: 1.6; }
+    @media (max-width: 620px) {
+      main { padding-top: 28px; }
+      .intro { margin-top: 56px; }
+      .controls { align-items: flex-start; flex-direction: column; }
+      .sound { margin-left: 0; }
+      .segment { grid-template-columns: 1fr; gap: 20px; padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand">iFLYTEK SIMULT</div>
+      <div class="direction">中文 → English</div>
+    </header>
+
+    <section class="intro">
+      <h1>开口说中文，<br>听见英文。</h1>
+      <p>点击开始并允许麦克风。英文译音会实时播放，中文原文与英文译文同步显示。</p>
+    </section>
+
+    <div class="controls">
+      <button id="toggle" type="button">开始同传</button>
+      <div id="status" class="status" role="status" aria-live="polite">
+        <span class="dot"></span><span id="statusText">准备就绪</span>
+      </div>
+      <label class="sound">
+        <input id="ttsToggle" type="checkbox" checked>
+        <span>播放英文译音</span>
+      </label>
+    </div>
+
+    <section id="transcript" class="transcript" aria-live="polite">
+      <div class="empty">译文会实时出现在这里</div>
+    </section>
+    <p class="note">当前讯飞接口固定支持普通话 → 英语；建议佩戴耳机并在安静环境使用。</p>
+  </main>
+
+  <script>
+    const toggle = document.querySelector('#toggle');
+    const statusBox = document.querySelector('#status');
+    const statusText = document.querySelector('#statusText');
+    const transcript = document.querySelector('#transcript');
+    const ttsToggle = document.querySelector('#ttsToggle');
+
+    let socket = null;
+    let stream = null;
+    let context = null;
+    let source = null;
+    let processor = null;
+    let current = null;
+    let finals = [];
+    let running = false;
+    let sessionOpen = false;
+    let playbackContext = null;
+    let playCursor = 0;
+
+    function setStatus(text, live = false) {
+      statusText.textContent = text;
+      statusBox.classList.toggle('live', live);
+    }
+
+    function render() {
+      transcript.replaceChildren();
+      const rows = current ? [...finals, {...current, partial: true}] : finals;
+      if (!rows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = running ? '正在听，请开始说中文…' : '译文会实时出现在这里';
+        transcript.append(empty);
+        return;
+      }
+      rows.forEach(row => {
+        const segment = document.createElement('article');
+        segment.className = `segment${row.partial ? ' partial' : ''}`;
+        [['原文', row.source, 'source'], ['English', row.translation, 'translation']].forEach(([label, text, kind]) => {
+          const column = document.createElement('div');
+          column.className = kind;
+          const labelNode = document.createElement('div');
+          labelNode.className = 'label';
+          labelNode.textContent = label;
+          const textNode = document.createElement('div');
+          textNode.className = 'text';
+          textNode.textContent = text || '…';
+          column.append(labelNode, textNode);
+          segment.append(column);
+        });
+        transcript.append(segment);
+      });
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    function pcm16(buffer) {
+      const output = new ArrayBuffer(buffer.length * 2);
+      const view = new DataView(output);
+      for (let i = 0; i < buffer.length; i += 1) {
+        const sample = Math.max(-1, Math.min(1, buffer[i]));
+        view.setInt16(i * 2, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+      }
+      return output;
+    }
+
+    function downsample(input, inputRate) {
+      if (inputRate === 16000) return input;
+      const ratio = inputRate / 16000;
+      const length = Math.round(input.length / ratio);
+      const output = new Float32Array(length);
+      let offset = 0;
+      for (let i = 0; i < length; i += 1) {
+        const next = Math.round((i + 1) * ratio);
+        let total = 0;
+        let count = 0;
+        for (; offset < next && offset < input.length; offset += 1) {
+          total += input[offset];
+          count += 1;
+        }
+        output[i] = count ? total / count : 0;
+      }
+      return output;
+    }
+
+    function resetPlayback() {
+      if (playbackContext && playbackContext.state !== 'closed') playbackContext.close();
+      playbackContext = null;
+      playCursor = 0;
+      if (ttsToggle.checked) {
+        playbackContext = new AudioContext();
+        playbackContext.resume();
+        playCursor = playbackContext.currentTime;
+      }
+    }
+
+    function playTts(pcm) {
+      if (!ttsToggle.checked || !playbackContext || playbackContext.state === 'closed') return;
+      if (playbackContext.state === 'suspended') playbackContext.resume();
+      const view = new DataView(pcm);
+      const samples = new Float32Array(Math.floor(view.byteLength / 2));
+      for (let i = 0; i < samples.length; i += 1) {
+        samples[i] = view.getInt16(i * 2, true) / 0x8000;
+      }
+      const audio = playbackContext.createBuffer(1, samples.length, 16000);
+      audio.copyToChannel(samples, 0);
+      const player = playbackContext.createBufferSource();
+      player.buffer = audio;
+      player.connect(playbackContext.destination);
+      const startsAt = Math.max(playCursor, playbackContext.currentTime + 0.025);
+      player.start(startsAt);
+      playCursor = startsAt + audio.duration;
+    }
+
+    async function startMicrophone() {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true}
+      });
+      context = new AudioContext();
+      source = context.createMediaStreamSource(stream);
+      processor = context.createScriptProcessor(2048, 1, 1);
+      processor.onaudioprocess = event => {
+        if (!socket || socket.readyState !== WebSocket.OPEN || !running) return;
+        const mono = event.inputBuffer.getChannelData(0);
+        socket.send(pcm16(downsample(mono, context.sampleRate)));
+      };
+      source.connect(processor);
+      processor.connect(context.destination);
+      running = true;
+      toggle.disabled = false;
+      toggle.textContent = '停止同传';
+      toggle.classList.add('live');
+      setStatus('正在聆听', true);
+      render();
+    }
+
+    async function releaseMicrophone() {
+      running = false;
+      if (processor) processor.disconnect();
+      if (source) source.disconnect();
+      if (stream) stream.getTracks().forEach(track => track.stop());
+      if (context && context.state !== 'closed') await context.close();
+      processor = source = stream = context = null;
+    }
+
+    async function finishSession(label = '已停止') {
+      await releaseMicrophone();
+      sessionOpen = false;
+      toggle.disabled = false;
+      toggle.textContent = '重新开始';
+      toggle.classList.remove('live');
+      setStatus(label);
+      current = null;
+      render();
+    }
+
+    async function startSession() {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setStatus('浏览器不支持麦克风');
+        return;
+      }
+      finals = [];
+      current = null;
+      resetPlayback();
+      render();
+      toggle.disabled = true;
+      sessionOpen = true;
+      setStatus('正在连接讯飞…');
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+      socket = new WebSocket(`${protocol}://${location.host}/ws`);
+      socket.binaryType = 'arraybuffer';
+      socket.onmessage = async event => {
+        if (event.data instanceof ArrayBuffer) {
+          playTts(event.data);
+          return;
+        }
+        const message = JSON.parse(event.data);
+        if (message.type === 'ready') {
+          try {
+            await startMicrophone();
+          } catch (_) {
+            setStatus('未获得麦克风权限');
+            toggle.disabled = false;
+            socket.close();
+          }
+        } else if (message.type === 'translation') {
+          const row = {source: message.source, translation: message.translation};
+          if (message.is_final) {
+            finals.push(row);
+            current = null;
+          } else {
+            current = row;
+          }
+          render();
+        } else if (message.type === 'done') {
+          await finishSession('本次同传完成');
+          socket.close();
+        } else if (message.type === 'error') {
+          await finishSession(message.code ? `讯飞错误 ${message.code}` : message.message);
+          socket.close();
+        }
+      };
+      socket.onerror = () => finishSession('连接失败，请重试');
+      socket.onclose = () => {
+        if (sessionOpen) finishSession('连接已关闭');
+      };
+    }
+
+    async function stopSession() {
+      toggle.disabled = true;
+      setStatus('正在生成最终译文…');
+      await releaseMicrophone();
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({type: 'stop'}));
+      } else {
+        await finishSession('连接已关闭');
+      }
+    }
+
+    toggle.addEventListener('click', () => running ? stopSession() : startSession());
+    ttsToggle.addEventListener('change', resetPlayback);
+    window.addEventListener('beforeunload', () => {
+      if (socket?.readyState === WebSocket.OPEN) socket.close();
+      if (playbackContext && playbackContext.state !== 'closed') playbackContext.close();
+    });
+
+    fetch('/health').then(response => response.json()).then(data => {
+      if (!data.configured) setStatus('请先配置讯飞三项凭据');
+    }).catch(() => setStatus('本地服务未就绪'));
+  </script>
+</body>
+</html>

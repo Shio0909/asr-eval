@@ -1,0 +1,9 @@
+fastapi==0.115.12
+faster-whisper==1.2.1
+numpy==1.26.4
+pydantic==2.11.7
+soundfile==0.13.1
+unbabel-comet==2.2.7
+utmosv2 @ https://codeload.github.com/sarulab-speech/UTMOSv2/tar.gz/cc2700db57bb83ee13dc31ebe1b868c254e15d09
+uvicorn==0.34.3
+wespeaker @ https://codeload.github.com/wenet-e2e/wespeaker/tar.gz/dfa741957e5c11f477623b6e583d67d0af25ee88

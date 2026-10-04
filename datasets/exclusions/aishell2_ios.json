@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "dataset": "aishell2_ios",
+  "updated_at": "2026-07-22",
+  "speakers": {
+    "C0932": {
+      "action": "exclude",
+      "reason": "systematic_audio_reference_misalignment",
+      "note": "官方 iOS 包中 W0107-W0496 长区间音文系统错位，W0497-W0500 为无关字母音频；未来抽样隔离整个说话人。"
+    }
+  },
+  "samples": {
+    "IC0932W0127": {
+      "action": "exclude",
+      "reason": "audio_reference_mismatch",
+      "matched_ref_id": "IC0932W0135"
+    },
+    "IC0932W0167": {
+      "action": "exclude",
+      "reason": "audio_reference_mismatch",
+      "matched_ref_id": "IC0932W0175"
+    },
+    "IC0932W0436": {
+      "action": "exclude",
+      "reason": "audio_reference_mismatch",
+      "matched_ref_id": "IC0932W0444"
+    },
+    "IC0932W0447": {
+      "action": "exclude",
+      "reason": "audio_reference_mismatch",
+      "matched_ref_id": "IC0932W0455"
+    },
+    "IC0932W0489": {
+      "action": "exclude",
+      "reason": "audio_reference_mismatch",
+      "matched_ref_id": "IC0932W0497"
+    }
+  }
+}

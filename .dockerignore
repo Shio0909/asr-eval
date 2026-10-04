@@ -1,0 +1,39 @@
+# 数据/产物/密钥不进镜像（走 数据卷或运行期注入）
+datasets/*
+!datasets/download.sh
+!datasets/golden/
+!datasets/golden/tts_formula.jsonl
+downloads/
+manifests/
+infer/
+results/
+result/
+audio_out/
+音频测试*/
+ast_demo/
+hfcache/
+
+# 密钥
+.env
+.env.*
+eval/secrets_local.py
+dashboard/interfaces.json
+jobs.json
+
+# 大音频/压缩
+*.mp3
+*.m4a
+*.pcm
+*.7z
+*.zip
+*.wav
+
+# 运行时杂物
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.DS_Store
+nohup.out
+

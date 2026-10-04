@@ -1,0 +1,35 @@
+[project]
+name = "asr-eval"
+version = "0.1.0"
+description = "语音模型测评框架与看板 — ASR/翻译/同传/总结/说话人分离"
+requires-python = ">=3.10"
+dependencies = [
+    # eval 运行时（infer/score/build_manifest）
+    "jiwer",          # WER/CER 编辑距离
+    "opencc",         # 繁简规一
+    "soundfile",      # 音频读取（系统需 libsndfile）
+    "numpy",
+    "scipy",          # polyphase 重采样
+    "requests",
+    "sacrebleu",      # chrF/BLEU
+    "OmniSTEval>=0.1.10,<0.2",  # 同传官方 YAAL/LongYAAL + 长音频 SoftSegmenter 重分段
+    "whisper-normalizer",  # 英文规一化(EnglishTextNormalizer，对齐 Whisper/HF Open ASR 口径)
+    "pyarrow",        # parquet builder
+    # 同传与专项指标（均支持 CPU；faster-whisper 模型权重运行时落 HF_HOME）
+    "websocket-client",
+    "protobuf>=6.31.1,<7",  # eval/_doubao_pb 生成版本
+    "faster-whisper",
+    "pyannote.metrics",
+    # 看板服务
+    "fastapi",
+    "uvicorn",
+    "websockets",      # 本地实时麦克风 demo 的浏览器 WebSocket 服务
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+data = ["modelscope", "huggingface-hub"]  # 数据下载（download.sh / 4MUG 标注）
+
+[tool.uv]
+# 锁定工具链：uv lock 生成 uv.lock，上云镜像构建期 uv sync --frozen，运行期零下载
+package = false
