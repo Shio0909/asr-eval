@@ -322,12 +322,12 @@
     <div class="module-label"><b>SIG&nbsp;MONITOR</b><span>四场景横评 · 统一口径 · 可溯源</span></div>
     <div style="display:grid;grid-template-columns:minmax(300px,5fr) minmax(280px,4fr);gap:26px;padding:26px 22px;align-items:center" id="hero-grid">
       <div>
-        <div class="hero-eyebrow">知己知彼 · 孙子·谋攻</div>
-        <h1 class="disp hero-hl">KNOW YOURSELF,<br/><span style="color:var(--signal)">KNOW YOUR RIVALS.</span></h1>
+        <div class="hero-eyebrow">UNIFIED · REPRODUCIBLE</div>
+        <h1 class="disp hero-hl">ONE YARDSTICK,<br/><span style="color:var(--signal)">EVERY MODEL.</span></h1>
         <div class="hero-tick"><span class="tk"></span><span>语音大模型横评</span><span class="rule"></span><span>SCALE · CER / BLEU / RTFx</span><span class="tk"></span></div>
         <p class="hero-sub">
-          <span class="hero-pair"><span class="zh">知己</span>自家四档摸底</span>
-          <span class="hero-pair"><span class="zh">知彼</span>竞品同场对照</span><br/>
+          <span class="hero-pair"><span class="zh">自测</span>自建接口摸底</span>
+          <span class="hero-pair"><span class="zh">对照</span>多家同场对比</span><br/>
           ASR 识别 · 翻译 · 总结，<b>统一口径</b>下同台量化。
         </p>
         <div style="display:flex;gap:2rem;margin-top:1.8rem;flex-wrap:wrap">
@@ -2350,7 +2350,7 @@ async function showIfaceManager(keepFilter){
   $('#modal-title').innerHTML='统一管理内置 / 自定义接口'
     +'<div class="mono" style="font-size:.66rem;font-weight:400;margin-top:.4rem;color:var(--faint)">状态切换、测试、编辑与恢复预置统一收口；运行区只负责选择，不再混入配置操作。</div>';
   $('#modal-card').style.maxWidth='1080px';
-  // 不分节：管理页是增删改查场景，角色语义留给榜单徽章。只保留"自家→外部→自定义"的扫描顺序。
+  // 不分节：管理页是增删改查场景，角色语义留给榜单徽章。只保留"内置→外部→自定义"的扫描顺序。
   const gorder=['iface','upstream','baseline','custom'];
   const allRaw=(DATA.models||[]).slice().sort((a,b)=>
     (gorder.indexOf(a.group||'custom')-gorder.indexOf(b.group||'custom'))||a.id.localeCompare(b.id));

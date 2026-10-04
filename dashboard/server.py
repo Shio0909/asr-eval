@@ -410,8 +410,8 @@ def _is_platform_url(endpoint: str) -> bool:
     return bool(ep) and any(ep.startswith(d) for d in (_PLAT_DISPLAY, _PLAT_WS_DISPLAY) if d)
 MODELS = [
     # ── 被测主体 · 四档模型（id=档位名）──
-    {"id": "light", "name": "Lite", "endpoint": "light", "group": "iface", "unverified": True, "url": _ep_display("LIGHT_URL", "/asr_lite")},
-    {"id": "light-mlt", "name": "Lite MLT · 多语种", "endpoint": "light", "group": "iface", "url": _ep_display("LIGHT_URL", "/asr_mlt_nano")},
+    {"id": "light", "name": "Light", "endpoint": "light", "group": "iface", "unverified": True, "url": _ep_display("LIGHT_URL", "/asr_lite")},
+    {"id": "light-mlt", "name": "Light MLT · 多语种", "endpoint": "light", "group": "iface", "url": _ep_display("LIGHT_URL", "/asr_mlt_nano")},
     {"id": "std", "name": "Standard", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/std", "key_env": _PLAT_KEY_ENV},
     {"id": "adv", "name": "Advanced", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/adv", "key_env": _PLAT_KEY_ENV},
     {"id": "adv-domain", "name": "Advanced Domain · 领域专业识别", "endpoint": "platform", "group": "iface", "url": f"{_PLAT_DISPLAY}/api/asr/adv-domain", "key_env": _PLAT_KEY_ENV},

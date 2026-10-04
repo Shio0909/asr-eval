@@ -96,6 +96,25 @@ uv run python eval/runner.py --manifest manifests/aishell_30.jsonl \
 
 ## 看板
 
+![运行配置](docs/images/run-config.png)
+
+**运行配置**：选择档位（轻量抽样 / 全量）、运行模式（精度并发 / 延迟串行）、并发数、条数和种子。
+每个「接口 × 数据集」组合可单独设置 `language`、热词等任务参数，并显示该接口的参数契约核对状态。
+参数变化会生成新的配置指纹，不会续跑旧结果。
+
+![样本级对比](docs/images/sample-diff.png)
+
+**样本级对比**：逐条显示参考与识别文本，删除、替换、插入分别高亮，同时给出单条 WER/CER、
+S/D/I 计数、长度比、耗时和 RTF，可直接试听原音频，便于定位错误类型。
+
+![样本浏览](docs/images/sample-browser.png)
+
+**样本浏览**：在跑分前先看数据集本身，音频与标注并列显示。
+
+此外看板还有任务列表（按状态、接口、数据集筛选，查看请求详情、返回示例和完整日志）和
+速度 × 质量散点图（横轴耗时，纵轴错误率，按场景着色）。
+
+
 ```bash
 uv sync --locked
 uv run python dashboard/server.py        # http://localhost:8088
