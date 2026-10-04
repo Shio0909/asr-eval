@@ -5,15 +5,10 @@
 
 > 注：`downloads/` 存放原始压缩包与 SpeechIO 官方仓库（含规一化脚本），不是数据本体。
 >
-> **状态口径**：本文件的“已有/已落地”指仓库维护者本地数据目录曾验证通过，不等于生产数据卷
-> 已经具备。线上以看板 `/api/overview` 为准。2026-07-31 生产卷为 61/67 可用；
-> FLEURS、FLEURS Multi、CoVoST2、ACL6060 四个同传集已可用，尚缺 WSYue Long 解压、
-> WMT、HardMTBench、Minutes、Formula、Diarization。0.3.3 运行镜像首启会自动补入 Formula golden。
->
-> `all` 包含 `phase_a + phase_b + phase_c + multilingual`，不包含需登录链接的
-> `chuan_yu`，也未包含 ACL6060 物化。重建空卷时需按 `ASR_DATASET_DOWNLOAD_HANDOFF.md` 补齐后者。
+> `all` 包含 `phase_a + phase_b + phase_c + multilingual`，不包含需登录链接的 `chuan_yu`，
+> 也不包含 ACL6060 的物化步骤（见 `eval/fetch_acl6060.py`）。数据本体不入仓，本文件的“已有”仅表示该数据集有下载与 builder 支持。
 
-## 长音频同传（2026-08-03 本地已接入）
+## 长音频同传
 
 | 路径 | 数据集 | 已接语向 | 整场样本 / 时长 | 参考类型 | builder |
 |---|---|---|---|---|---|
@@ -27,9 +22,8 @@
 用于后续分段稳定性、术语和延迟分析。BSTC development 压缩包已完整校验并登记为
 可运行数据集，builder 首次使用时幂等解压；EPIC 仍未登记，避免页面能选但实际读到半包。
 
-> 状态：🟢 已有(沿用旧报告 ASR 三件套) · 🆕 本项目新增。
-> ⚠️ 自建集 `sb2_cap_asr_v2.0`（2712 条，六维度：基础语音/噪音干扰/发音偏差/固定表达/说话重叠/组合难点）**已不可获取**（2026-06 确认）。
-> 维度由公开集补位：基础语音→SpeechIO/AISHELL，噪音干扰→VWB，发音偏差→**WSC-Eval/KeSpeech/Wu-Bench/MagicData 川渝 12 城**，固定表达→SeACo/AISHELL-NER，说话重叠→AliMeeting。
+> 状态：🟢 基础集 · 🆕 扩展集。
+> 以下按评测维度列出可用的公开数据集：基础语音→SpeechIO/AISHELL，噪音干扰→VWB，发音偏差→**WSC-Eval/KeSpeech/Wu-Bench/MagicData 川渝 12 城**，固定表达→SeACo/AISHELL-NER，说话重叠→AliMeeting。
 
 ## 已落地（Phase A · 无需登录 · 实测可拉）
 
@@ -77,9 +71,9 @@
 > `api=HubApi(); api.login("<TOKEN>"); MsDataset.load('Alimeeting4MUG', namespace='modelscope', subset_name='default', split='test')`。
 > ⚠️ 下载会成功，但 `datasets` 自动解析 CSV 会因字段不一致报错 → 数据已落 `~/.cache/modelscope`，**手动用 `pandas.read_csv(sep='\t')` 读**（2 列 idx+content，content 是 JSON）。
 
-> ⚠️ **磁盘预算**：本机 512G，`datasets/` 控制在 ~20G 以内。以下大块**不要自动下**，确需再单独拉。
+> ⚠️ **磁盘**：以下大块体积较大，默认不下载，需要时再单独拉取。
 
-## Phase B（2026-06 调研新增 · `download.sh phase_b` · 全链路核实见 ../docs/plat-data-gaps.md）
+## Phase B（2026-06 调研新增 · `download.sh phase_b`）
 
 | 状态 | 路径 | 数据集 | 内容 | 体积 | 补的缺口 | License |
 |---|---|---|---|---|---|---|
@@ -136,11 +130,11 @@ CHUAN_YU_12CITY_URL='<MagicHub ZIP 直链>' bash datasets/download.sh chuan_yu
 ## 必须自建（公开集空白，详见 ../docs/dataset-plan.md §4）
 
 1. 领域 ASR：**金融 / 法律 / 政务**（医疗已被 MED-IT 覆盖，不在此列；法律最难）
-2. 业务热词场景：机器人讲解 / 儿童陪伴（扩充自建集 `sb2_cap_asr_v2.0`，带 keyword）
+2. 业务热词场景：机器人讲解 / 儿童陪伴（带 keyword）
 3. 结构化会议纪要（议题/决策/待办）—— 可基于 AMC-A + AMI 方案补标
 > 专业领域音频获取策略（业务流量脱敏 / 商用采购 / 公开音视频爬标 / **TTS 合成**）见 ../docs/dataset-plan.md §4。
 
 ## 配套工具（已就位）
 
-- 中文文本规一化：SpeechIO 官方 `textnorm_zh.py`，已纳入项目 `eval/textnorm_zh.py`（另有副本在 `downloads/speechio_leaderboard/utils/`）
+- 中文文本规一化：SpeechIO 官方 `textnorm_zh.py`，已纳入项目 `eval/textnorm_zh.py`，来源见根目录 `NOTICE`
 - 指标库（用时 pip）：jiwer / sacrebleu / unbabel-comet / deepeval / rouge-score / bert-score

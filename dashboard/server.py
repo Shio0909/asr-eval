@@ -36,22 +36,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def _load_dotenv(path=os.path.join(ROOT, ".env")):
-    try:
-        with open(path, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-    except FileNotFoundError:
-        pass
-
-
-_load_dotenv()
-
 sys.path.insert(0, os.path.join(ROOT, "eval"))   # 复用 eval/logconf 的中央日志配置
+from config import load_dotenv  # noqa: E402
+
+load_dotenv()
+
 from infer import infer_file_path, language_tag  # noqa: E402
 from adapters import (  # noqa: E402
     LONGFORM_PROGRESS_MARKER,

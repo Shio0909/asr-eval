@@ -1,4 +1,4 @@
-"""normalize.py 黄金用例 — 口径对齐旧报告《ASR能力横评》/SpeechIO LeaderBoard。
+"""normalize.py 黄金用例 — 口径对齐 SpeechIO LeaderBoard。
 
 覆盖：繁→简、全半角、英文小写、去语气词、去儿化（含白名单）、
 中文数字规一化、去标点、去空格（英文词间空格保留）。

@@ -3,8 +3,40 @@
 上云只改环境变量，不动代码（十二要素）。本地零感知。
 """
 import os
+import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def parse_env_value(raw):
+    """解析 .env 的值：支持成对引号；未加引号时，空白后的 # 视为行尾注释。"""
+    raw = raw.strip()
+    if raw[:1] in ("'", '"'):
+        end = raw.find(raw[0], 1)
+        if end > 0:
+            return raw[1:end]
+    return re.split(r"(?:^|\s+)#", raw, maxsplit=1)[0].strip()
+
+
+def load_dotenv(path=None):
+    """把 .env 读进 os.environ（已有的环境变量优先）。空值 `KEY=` 也会设置为空串。"""
+    path = path or os.path.join(ROOT, ".env")
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("export "):
+                    line = line[7:].lstrip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), parse_env_value(v))
+    except FileNotFoundError:
+        pass
+
+
+# 必须早于下面任何 os.environ 读取：只写在 .env 里的端点也要生效。
+load_dotenv()
 
 
 def _env(key, default):

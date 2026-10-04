@@ -51,16 +51,39 @@ tests/         单元测试与指标黄金用例
 
 ## 快速开始
 
-```bash
-# 1) 数据集 → manifest（--shuffle 随机抽样，--seed 可复现）
-uv run --with pyarrow python eval/build_manifest.py aishell --shuffle --limit 30 --out manifests/aishell_lite.jsonl
+### 0) 先看输出长什么样（无需模型和数据）
 
-# 2) 跑分：infer + score
-uv run python eval/runner.py --manifest manifests/aishell_lite.jsonl \
-  --model sensevoice --language zh --out results/aishell_sensevoice.json
+```bash
+uv sync --locked
+uv run python eval/score.py \
+  --manifest examples/mini/manifest.jsonl \
+  --infer examples/mini/infer_demo.jsonl --out /tmp/asr-eval-mini.json
 ```
 
-前提：先在环境变量里配置你要测的端点（例如 `SENSEVOICE_URL`），或使用厂商预设并设置对应 key。
+用预置的识别结果演示 score 阶段，见 `examples/mini/README.md`。
+
+### 1) 准备数据
+
+数据本体不入仓。先下载核心公开集（约 5-7 GB，无需登录；依赖 `hf`、`git`、`git-lfs`、`curl`）：
+
+```bash
+bash datasets/download.sh phase_a
+```
+
+其他阶段和各数据集的来源、许可见 `datasets/README.md`。
+
+### 2) 配置要测的端点
+
+复制 `.env.example` 为 `.env`，只填你要测的接口（例如 `SENSEVOICE_URL`），或使用厂商预设并设置对应 key。
+`.env` 与环境变量均可，环境变量优先。
+
+### 3) 生成 manifest 并跑分
+
+```bash
+uv run --with pyarrow python eval/build_manifest.py aishell --shuffle --limit 30 --out manifests/aishell_30.jsonl
+uv run python eval/runner.py --manifest manifests/aishell_30.jsonl \
+  --model sensevoice --language zh --out results/aishell_sensevoice.json
+```
 
 常用选项：
 
@@ -78,7 +101,8 @@ uv sync --locked
 uv run python dashboard/server.py        # http://localhost:8088
 ```
 
-- 对外暴露时必须设置 `DASH_PASS`（HTTP Basic 鉴权）。本机隔离开发可留空。
+- 必须显式设置 `DASH_PASS`（HTTP Basic 鉴权，账号由 `DASH_USER` 指定，默认 `admin`）。未设置时所有请求返回 503；
+  仅在隔离的本机开发环境，可在 `.env` 或环境变量里写 `DASH_PASS=`（空值）来关闭鉴权。对外暴露时必须用强口令。
 - 自定义接口保存在 `dashboard/interfaces.json`（已被 `.gitignore` 排除）。密钥只从环境变量读取。
 - 同传 `tts_err` 首次运行会下载 faster-whisper 权重到 `HF_HOME`。
 - COMET 为可选重型依赖，建议装在独立环境，并用 `COMET_PYTHON` 指向它。
@@ -113,5 +137,5 @@ make test
 
 ## 许可
 
-代码以 Apache-2.0 发布，见 `LICENSE`。`deploy/` 下如有第三方组件，遵循其各自的许可。
+代码以 Apache-2.0 发布，见 `LICENSE`；第三方内容及其许可状态见 `NOTICE`。`deploy/` 下如有第三方组件，遵循其各自的许可。
 数据集和第三方模型的许可由其发布方决定，不受本仓库许可覆盖。

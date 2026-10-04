@@ -1,6 +1,6 @@
 """统一文本规一化 — 复用 SpeechIO LeaderBoard 的 TextNorm。
 
-口径对齐旧报告《ASR能力横评》:
+口径:
 全角转半角、英文统一小写、去语气词、去儿化、繁转简、数字规一化、去空格。
 ref 与 hyp 用同一个 normalizer，保证口径一致。
 """

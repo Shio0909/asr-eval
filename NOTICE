@@ -1,0 +1,17 @@
+asr-eval 第三方内容说明
+
+本项目自身代码按 Apache-2.0 发布（见 LICENSE）。下列内容来自第三方，不在该许可范围内，
+再分发前请自行确认其许可。
+
+1. eval/textnorm_zh.py
+   中文文本规一化脚本，来自 SpeechIO / SpeechColab Leaderboard 的 utils/textnorm_zh.py，
+   文件头署名：2019.5 Zhiyang Zhou（chn_text_norm），2019.9–2022 Jiayu DU。
+   上游：https://github.com/SpeechColab/Leaderboard
+   说明：撰写本说明时，上游仓库页面未见 LICENSE 文件，许可条款未能确认。
+
+2. eval/_doubao_pb/
+   由 protobuf 编译器根据第三方语音翻译服务的接口定义（.proto）生成的 Python 代码，
+   protobuf 版本 6.31.1，用于 doubao-simult adapter。.proto 的来源与许可条款未能确认。
+   如需移除，删除该目录并去掉 adapters.py 中的 doubao-simult 即可，其余功能不受影响。
+
+3. 依赖库（whisper-normalizer、jiwer、sacrebleu 等）按各自许可通过 pip/uv 安装，未随仓库分发。

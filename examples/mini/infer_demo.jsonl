@@ -1,0 +1,3 @@
+{"id": "zh-001", "hyp": "今天天气很好我们去公园散步", "elapsed_s": 0.4, "audio_s": 3.0, "ok": true, "error": null}
+{"id": "zh-002", "hyp": "请把会议记要发给我", "elapsed_s": 0.5, "audio_s": 2.5, "ok": true, "error": null}
+{"id": "en-001", "hyp": "The quick brown fox jumped over the lazy dog", "elapsed_s": 0.6, "audio_s": 3.5, "ok": true, "error": null}

@@ -174,23 +174,6 @@ def _ws_control_record(endpoint, connected, task_start, task_started):
     }
 
 
-def _load_dotenv(path=None):
-    path = path or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-    try:
-        with open(path, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-    except FileNotFoundError:
-        pass
-
-
-_load_dotenv()
-
-
 def _plat_token(api_key=None):
     """None=内置平台服务从密钥环境变量取；空串=显式无鉴权（自定义接口）。"""
     return os.environ.get("ASR_PLATFORM_TOKEN", "") if api_key is None else api_key
@@ -1200,7 +1183,7 @@ class LightASRAdapter:
     """轻量 ASR 服务 — POST /asr_lite 或 /asr_mlt_nano。
 
     支持 hotwords → 可测 ASR 场景 b(自有提示词)。不同 base_url 可对应不同后端。
-    评测口径对齐旧报告: itn=false(关闭逆文本规范化)。
+    评测口径: itn=false(关闭逆文本规范化)。
     """
 
     supports_hotwords = True   # infer --hotwords 时把 manifest keywords 传进来(空格分隔)
